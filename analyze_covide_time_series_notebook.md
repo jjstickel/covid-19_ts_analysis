@@ -1,39 +1,57 @@
-"""
-Read in Johns Hopkins' COVID-19 timeseries data (source:
-https://github.com/CSSEGISandData/COVID-19) and perform some basic analysis
+# COVID-19 time-series analysis
 
-"""
+Jonathan Stickel, 2020
 
-# Jonathan Stickel, 2020
+This purpose of this notebook (and repository) is to make available a set of time-series
+analyses of COVID-19 data. Data sources are:
 
-# on 3/23/20, J-H switched to a new set of csv files
+- https://github.com/CSSEGISandData/COVID-19 (Johns Hopkins CSSE COVID-19 data)
+- https://data.worldbank.org/indicator/sp.pop.totl (population data)
 
-# TODO:
-# - Process countries with multiple entries. Will need to make sure that the
-#   sum provides the correct result
-# - estimate current number sick (confirmed - deaths - recovered)
-# - (long term) switch from dict to class
-# - add ability to read US data file (by state, city)
+The Johns Hopkins CSSE git repository is expected to be cloned to an adjent folder and kept up-to-date by the user (or, in future notebook implementation, use pandas to read directly the URL).
 
+Dependencies are:
+
+- `numpy`
+- `pandas`
+- `scikit.datasmooth` (can be pip installed)
+
+Also `findiffjs` is part of this repository.
+
+
+TODO:
+- **arrange related plots together**
+- **Read data directly from URL**
+- Process countries with multiple entries. Will need to make sure that the
+  sum provides the correct result
+- estimate current number sick (confirmed - deaths - recovered)
+- add ability to read US data file (by state, city)
+- (long term) switch from dict to class
+
+```python
+# import modules
 import numpy as np
 import pandas as pd
 from matplotlib.pyplot import *
 import matplotlib.dates as mdates
 from datetime import datetime
 from decimal import Decimal
-
-from findiffjs import deriv1_fd
-#import regularsmooth as ds # my local copy
 import scikits.datasmooth as ds # pip installed
+from findiffjs import deriv1_fd
+```
 
+# User input
 
-## User input -- put up to 5 countries of interest in this list. Must be the
-## same name used in the JH global files, and (at the moment), it must be a
-## single entry in the file (e.g., China has multiple entries and will cause an
-## Exception)
+```python
+# Put up to 5 countries of interest in this list. Must be the
+# same name used in the JH global files, and (at the moment), it must be a
+# single entry in the file (e.g., China has multiple entries and will cause an
+# Exception)
 countries = ["US", "Italy", "Spain"]
 nctry = len(countries)
+```
 
+```python
 # read in Johns Hopkins' data tables
 pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 # read in global data
@@ -45,11 +63,15 @@ data_recovered = pd.read_csv(pathname + "time_series_covid19_recovered_global.cs
 header = data_confirmed.columns.values
 dates = pd.to_datetime(header[4:])
 ndays = dates.size
+```
 
+```python
 # read in population data (source: https://data.worldbank.org/indicator/sp.pop.totl)
 file_pop = "API_SP.POP.TOTL_DS2_en_csv_v2_887275/API_SP.POP.TOTL_DS2_en_csv_v2_887275_2018.csv"
 data_pop = pd.read_csv(file_pop, header=4)
+```
 
+```python
 def read_cases(data, country):
     """
     Select country data values. The country data must be in a single row for the
@@ -72,7 +94,10 @@ def read_pop(data, country):
     if row.size == 0:
         raise Exception("%s is not in the population data file" % country)
     return row.loc[:, "2018"].values[0]
-    
+```
+
+```python
+# Create dictionary variable structure to hold each country's data and then read the data
 corona = dict()
 for country in countries:
     ctryd = dict()
@@ -82,12 +107,19 @@ for country in countries:
     ctryd['cnf'] = read_cases(data_confirmed, country)
     ctryd['dth'] = read_cases(data_deaths, country)
     ctryd['rec'] = read_cases(data_recovered, country)
+```
 
-##### scaling factor for cases, i.e., "x per mult" ######
+The scaling factor for normalization and the criteria for determining zero-time are set here. I have tried a few values and have determined that these give consistently reasonable results.
+
+```python
+##### scaling factor for cases, i.e., "deaths per mult" ######
 mult=1e6
+# low-value criterium to determine where to set zero time; using "confirmed" data for this
+# because it seems less noisy than deaths
 critlow = 10*1e-6 # for time zero, using confirmed
-#critlow = 0.1*1e-6 # for time zero, using deaths
+```
 
+```python
 # normalization
 def normalize_range(dates, ctryd, mult=mult, criteria=critlow):
     """
@@ -100,7 +132,6 @@ def normalize_range(dates, ctryd, mult=mult, criteria=critlow):
     ctryd["dth_pc"] = ctryd["dth"]/pop*mult
     ctryd["rec_pc"] = ctryd["rec"]/pop*mult
     criteval = ctryd["cnf_pc"] > criteria*mult # use confirmed metric for time zero
-    #criteval = ctryd["dth_pc"] > criteria*mult # use death metric for time zero
     idx0 = np.nonzero(criteval)[0][0]
     ctryd["idx0"] = idx0
     ctryd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
@@ -109,7 +140,11 @@ def normalize_range(dates, ctryd, mult=mult, criteria=critlow):
 for country in countries:
     ctryd = corona[country]
     normalize_range(dates, ctryd)
+```
 
+Determine an exponential fit for the early part of the confirmed cases. As will be observed in the plots, it does not take very long before the growth of cases slows from exponential.
+
+```python
 # compute exponential fit 
 def expfit(t, y):
     """
@@ -119,7 +154,6 @@ def expfit(t, y):
     return np.exp(lna), k
 
 crithigh = 200*1e-6 # upper bound for exponential fit, for fitting confirmed
-#crithigh = 2*1e-6 # upper bound for exponential fit, for fitting deaths
 for country in countries:
     ctryd = corona[country]
     criteval = ctryd['cnf_pc'] < crithigh*mult
@@ -132,7 +166,9 @@ for country in countries:
     ctryd['k'] = k
     ctryd['dt2in'] = dt2in
     ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
-    
+```
+
+```python
 # determine rates
 lmbd=5e-5
 for country in countries:
@@ -157,9 +193,12 @@ for country in countries:
     # take the derivative
     ctryd['cnf_rate'] = deriv1_fd(ctryd['cnf_pc_h'], ctryd['days'], central=True)
     ctryd['dth_rate'] = deriv1_fd(ctryd['dth_pc_h'], ctryd['days'], central=True)
+```
 
+```python
 ### plotting ###
-ion()
+rcParams.update({'font.size': 14})
+figsize = (8,6)
 clr = ['C%g' % i for i in range(10)]
 sbl = ["o", "s", "v", "d", "h"]
 savefigs = False
@@ -169,11 +208,12 @@ clinv_tup = Decimal("%.1g"%(1/critlow)).as_tuple()
 clinv_dig = clinv_tup.digits[0]
 clinv_exp = clinv_tup.exponent
 
-N = 0
+N=0 # figure counter
+```
 
+```python
 # total confirmed, not scaled
-N+=1; figure(N)
-#figure(1, figsize=(4,3))
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -192,9 +232,11 @@ legend(loc='best')
 if savefigs:
     savefig("confirmed.pdf", bbox_inches="tight")
     savefig("confirmed.png", bbox_inches="tight")
+```
 
+```python
 # confirmed per capita
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -212,9 +254,11 @@ legend(loc='best')
 if savefigs:
     savefig("confirmed_scaled.pdf", bbox_inches="tight")
     savefig("confirmed_scaled.png", bbox_inches="tight")
+```
 
+```python
 # log confirmed per capita
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -228,9 +272,11 @@ xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
 #ylabel("confirmed per %1.0e" % mult)
 ylabel("confirmed per $10^%i$" % np.log10(mult))
 legend(loc='best')
+```
 
+```python
 # rate confirmed per capita
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -243,9 +289,11 @@ ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
 legend(loc="best")
 if savefigs:
     savefig("confirmed_rate.png", bbox_inches="tight")
+```
 
+```python
 # total deaths, not scaled
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 #figure(1, figsize=(4,3))
 clf()
 for i in range(nctry):
@@ -263,9 +311,11 @@ ylabel("deaths")
 legend(loc='best')
 if savefigs:
     savefig("temp.pdf", bbox_inches="tight")
- 
+```
+
+```python
 # deaths per capita
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -281,9 +331,11 @@ ylabel("deaths per $10^%i$" % np.log10(mult))
 legend(loc='best')
 if savefigs:
     savefig("temp.pdf", bbox_inches="tight")
-    
+```
+
+```python
 # rate deaths per capita
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -296,9 +348,11 @@ ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
 legend(loc="best")
 if savefigs:
     savefig("temp.png", bbox_inches="tight")
+```
 
+```python
 # case fatality ratio
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 for i in range(nctry):
     ctryd = corona[countries[i]]
@@ -311,9 +365,11 @@ ylabel("case-fatality ratio")
 legend(loc="best")
 if savefigs:
     savefig("temp.png", bbox_inches="tight")
+```
 
+```python
 # confirmed per-capita cases and deaths on one graph
-N+=1; figure(N)
+N+=1; figure(N, figsize=figsize)
 clf()
 ax1 = subplot(111)
 ax2 = ax1.twinx()
@@ -336,4 +392,5 @@ handles, labels = ax1.get_legend_handles_labels()
 legend(handles, labels, loc='best')
 if savefigs:
     savefig("temp.pdf", bbox_inches="tight")
+```
 
