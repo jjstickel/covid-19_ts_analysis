@@ -1,0 +1,22 @@
+# data files
+*.csv
+
+# backup files
+*.sav
+*.bak
+*~
+*save*
+
+# zip files
+*.zip
+*.gz
+
+# graphic files
+*.pdf
+*.png
+
+# python/jupyter binary and temp files
+*.pyc
+.ipynb_checkpoints/
+
+.DS_Store
