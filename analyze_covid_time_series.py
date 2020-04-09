@@ -69,9 +69,10 @@ def read_cases(data, country):
 
 def read_pop(data, country):
     """ Get the population for a country """
-    # switch name of US country to match the entry in the population data file;
+    # switch name of some countries to match the entry in the population data file;
     # there may be more of these...
     if country is "US": country = "United States"
+    if country is "Iran": country = "Iran, Islamic Rep."
     row = data_pop[ data_pop["Country Name"]==country ]
     if row.size == 0:
         raise Exception("%s is not in the population data file" % country)
