@@ -8,7 +8,7 @@ analyses of COVID-19 data. Data sources are:
 - https://github.com/CSSEGISandData/COVID-19 (Johns Hopkins CSSE COVID-19 data)
 - https://data.worldbank.org/indicator/sp.pop.totl (population data)
 
-The Johns Hopkins CSSE git repository is expected to be cloned to an adjent folder and kept up-to-date by the user (or, in future notebook implementation, use pandas to read directly the URL).
+By default, the COVID-19 data is grabbed from the Johns Hopkins CSSE github.com repository. When using this notebook on a local machine, you may instead clone the repo to an adjent folder and keep it up-to-date (see `websource` flag below).
 
 Dependencies are:
 
@@ -17,6 +17,10 @@ Dependencies are:
 - `scikit.datasmooth` (can be pip installed)
 
 Also `findiffjs` is part of this repository.
+
+binder URL for web-based "live" notebook: (??)
+
+https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master
 
 
 TODO:
@@ -48,12 +52,16 @@ from findiffjs import deriv1_fd
 # single entry in the file (e.g., China has multiple entries and will cause an
 # Exception)
 countries = ["US", "Italy", "Spain"]
-nctry = len(countries)
+# flag for using web or local address for the Johns Hopkins CSSE data
+websource = True
 ```
 
 ```python
 # read in Johns Hopkins' data tables
-pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
+if websource:
+    pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+else:
+    pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 # read in global data
 data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
 data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
@@ -98,6 +106,7 @@ def read_pop(data, country):
 
 ```python
 # Create dictionary variable structure to hold each country's data and then read the data
+nctry = len(countries)
 corona = dict()
 for country in countries:
     ctryd = dict()

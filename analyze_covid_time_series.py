@@ -32,10 +32,14 @@ import scikits.datasmooth as ds # pip installed
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 countries = ["US", "Italy", "Spain"]
-nctry = len(countries)
+# flag for using web or local address for the Johns Hopkins CSSE data
+websource = True
 
 # read in Johns Hopkins' data tables
-pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
+if websource:
+    pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+else:
+    pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 # read in global data
 data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
 data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
@@ -72,7 +76,8 @@ def read_pop(data, country):
     if row.size == 0:
         raise Exception("%s is not in the population data file" % country)
     return row.loc[:, "2018"].values[0]
-    
+
+nctry = len(countries)
 corona = dict()
 for country in countries:
     ctryd = dict()
