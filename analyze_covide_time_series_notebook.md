@@ -18,9 +18,8 @@ Dependencies are:
 
 Also `findiffjs` is part of this repository.
 
-binder URL for web-based "live" notebook: (??)
-
-https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master
+Click on this link for a web-based "live" notebook:
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covide_time_series_notebook.ipynb)
 
 
 TODO:
