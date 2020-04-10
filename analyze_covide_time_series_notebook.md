@@ -14,22 +14,15 @@ Dependencies are:
 
 - `numpy`
 - `pandas`
+- `matplotlib`
+- `cvxopt
 - `scikit.datasmooth` (can be pip installed)
 
-Also `findiffjs` is part of this repository.
+Also, `findiffjs` is part of this repository.
 
-Click on this link for a web-based "live" notebook:
+Click on this link for a web-based "live" notebook (it may take awhile to load, be patient):
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covide_time_series_notebook.ipynb)
 
-
-TODO:
-- **arrange related plots together**
-- **Read data directly from URL**
-- Process countries with multiple entries. Will need to make sure that the
-  sum provides the correct result
-- estimate current number sick (confirmed - deaths - recovered)
-- add ability to read US data file (by state, city)
-- (long term) switch from dict to class
 
 ```python
 # import modules
@@ -50,7 +43,7 @@ from findiffjs import deriv1_fd
 # same name used in the JH global files, and (at the moment), it must be a
 # single entry in the file (e.g., China has multiple entries and will cause an
 # Exception)
-countries = ["US", "Italy", "Spain"]
+countries = ["US", "Italy", "Spain", "Iran"]
 # flag for using web or local address for the Johns Hopkins CSSE data
 websource = True
 ```
@@ -94,10 +87,8 @@ def read_cases(data, country):
 
 def read_pop(data, country):
     """ Get the population for a country """
-    # switch name of some countries to match the entry in the population data file;
-    # there may be more of these...
-    if country is "US": country = "United States"
-    if country is "Iran": country = "Iran, Islamic Rep."
+    # There may be some name mismatches that need correction in the population
+    # file -- please create an issue or pull request when you find them
     row = data_pop[ data_pop["Country Name"]==country ]
     if row.size == 0:
         raise Exception("%s is not in the population data file" % country)
@@ -129,26 +120,53 @@ critlow = 10*1e-6 # for time zero, using confirmed
 ```
 
 ```python
-# normalization
-def normalize_range(dates, ctryd, mult=mult, criteria=critlow):
+# normalization and smoothing
+def per_capita(ctryd, mult=mult, criteria=critlow):
     """
-    calculate per capita cases (confirmed, deaths, and recovered) and scale
-    elapsed time to a normalized point
+    calculate per capita cases (confirmed, deaths, and recovered)
 
     """
     pop = ctryd["population"]
     ctryd["cnf_pc"] = ctryd["cnf"]/pop*mult
     ctryd["dth_pc"] = ctryd["dth"]/pop*mult
     ctryd["rec_pc"] = ctryd["rec"]/pop*mult
-    criteval = ctryd["cnf_pc"] > criteria*mult # use confirmed metric for time zero
+    return 
+def time_zero(dates, ctryd, mult=mult, criteria=critlow):
+    """
+    shift elapsed time to specified number of _smoothed per-capita cases_
+    """
+    criteval = ctryd["cnf_pc_h"] > criteria*mult # use confirmed metric for time zero
+    #criteval = ctryd["dth_pc"] > criteria*mult # use death metric for time zero
     idx0 = np.nonzero(criteval)[0][0]
     ctryd["idx0"] = idx0
     ctryd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
-    return 
+    return
 
+days = (dates - dates[0]).astype('timedelta64[D]').values
+lmbd=5e-5 # smoothing parameter
 for country in countries:
     ctryd = corona[country]
-    normalize_range(dates, ctryd)
+    # compute per-capita
+    per_capita(ctryd)
+    # smoothing
+    if False:
+        # smoothing, unconstrained
+        ctryd['cnf_pc_h'] = ds.smooth_data(days, ctryd['cnf_pc'], d=2, lmbd=lmbd)
+        ctryd['dth_pc_h'] = ds.smooth_data(days, ctryd['dth_pc'], d=2, lmbd=lmbd)
+    else:
+        # smoothing, with constraints
+        # constrain cases to be non-negative
+        Aones = -np.eye(ndays)
+        bzero = np.zeros((ndays,1))
+        # constrain cases to be always increasing
+        D = -ds.derivative_matrix(days,1)
+        bdzero = np.zeros((ndays-1,1))
+        Aiq = np.vstack((Aones,D))
+        biq = np.vstack((bzero, bdzero))
+        ctryd['cnf_pc_h'] = ds.smooth_data_constr(days, ctryd['cnf_pc'], 2, lmbd, (Aiq,biq))
+        ctryd['dth_pc_h'] = ds.smooth_data_constr(days, ctryd['dth_pc'], 2, lmbd, (Aiq,biq))
+    # set time-zero and create elapsed time
+    time_zero(dates, ctryd)
 ```
 
 Determine an exponential fit for the early part of the confirmed cases. As will be observed in the plots, it does not take very long before the growth of cases slows from exponential.
@@ -179,33 +197,16 @@ for country in countries:
 
 ```python
 # determine rates
-lmbd=5e-5
 for country in countries:
     ctryd = corona[country]
-    if False:
-        # smoothing, unconstrained
-        ctryd['cnf_pc_h'] = ds.smooth_data(ctryd['days'], ctryd['cnf_pc'], d=2, lmbd=lmbd)
-    else:
-        # smoothing, with constraints
-        # constrain cases to be non-negative
-        Aones = -np.eye(ndays)
-        bzero = np.zeros((ndays,1))
-        # constrain cases to be always increasing
-        D = -ds.derivative_matrix(ctryd['days'],1)
-        bdzero = np.zeros((ndays-1,1))
-        Aiq = np.vstack((Aones,D))
-        biq = np.vstack((bzero, bdzero))
-        ctryd['cnf_pc_h'] = ds.smooth_data_constr(ctryd['days'], ctryd['cnf_pc'], 2, lmbd,
-                                                  (Aiq,biq))
-        ctryd['dth_pc_h'] = ds.smooth_data_constr(ctryd['days'], ctryd['dth_pc'], 2, lmbd,
-                                                  (Aiq,biq))
     # take the derivative
     ctryd['cnf_rate'] = deriv1_fd(ctryd['cnf_pc_h'], ctryd['days'], central=True)
     ctryd['dth_rate'] = deriv1_fd(ctryd['dth_pc_h'], ctryd['days'], central=True)
 ```
 
+# Plotting
+
 ```python
-### plotting ###
 rcParams.update({'font.size': 14})
 figsize = (8,6)
 clr = ['C%g' % i for i in range(10)]
