@@ -1,5 +1,5 @@
 """
-Read in Johns Hopkins' COVID-19 timeseries data (source:
+Read in Johns Hopkins CSSE COVID-19 timeseries data (source:
 https://github.com/CSSEGISandData/COVID-19) and perform some basic analysis
 
 """
@@ -10,7 +10,6 @@ https://github.com/CSSEGISandData/COVID-19) and perform some basic analysis
 
 # TODO:
 
-# - make a module for all the data processing that can be used for both
 #   scripting and notebook
 # - Process countries with multiple entries. Will need to make sure that the
 #   sum provides the correct result
@@ -19,15 +18,11 @@ https://github.com/CSSEGISandData/COVID-19) and perform some basic analysis
 # - add ability to read US data file (by state, city)
 
 import numpy as np
-import pandas as pd
+from decimal import Decimal
+from datetime import datetime
 from matplotlib.pyplot import *
 import matplotlib.dates as mdates
-from datetime import datetime
-from decimal import Decimal
-
-from findiffjs import deriv1_fd
-#import regularsmooth as ds # my local copy
-import scikits.datasmooth as ds # pip installed
+from covid19ts import covid19_global
 
 
 ## User input -- put up to 5 countries of interest in this list. Must be the
@@ -35,114 +30,15 @@ import scikits.datasmooth as ds # pip installed
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 countries = ["US", "Italy", "Spain", "Iran"]
-# flag for using web or local address for the Johns Hopkins CSSE data
-websource = False
 
-# read in Johns Hopkins' data tables
-if websource:
-    pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
-else:
-    pathname = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
-# read in global data
-data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
-data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
-data_recovered = pd.read_csv(pathname + "time_series_covid19_recovered_global.csv")
-# presume these files all have the same "fixed" structure -- could put in a
-# check at some point
-header = data_confirmed.columns.values
-dates = pd.to_datetime(header[4:])
-ndays = dates.size
+JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
-# read in population data (source: https://data.worldbank.org/indicator/sp.pop.totl)
-file_pop = "API_SP.POP.TOTL_DS2_en_csv_v2_887275/API_SP.POP.TOTL_DS2_en_csv_v2_887275_2018.csv"
-data_pop = pd.read_csv(file_pop, header=4)
-
-def read_cases(data, country):
-    """
-    Select country data values. The country data must be in a single row for the
-    current implementation.
-    """
-    # get the row for the country
-    c_bool = data["Country/Region"] == country
-    c_data = data[c_bool]
-    if c_data.shape[0] is 1:
-        return np.squeeze(c_data.iloc[:,4:].values)
-    else:
-        raise Exception("Not implemented:  there is more than one row (or no rows) of %s data." % country)
-
-def read_pop(data, country):
-    """ Get the population for a country """
-    # There may be some name mismatches that need correction in the population
-    # file -- please create an issue or pull request when you find them
-    row = data_pop[ data_pop["Country Name"]==country ]
-    if row.size == 0:
-        raise Exception("%s is not in the population data file" % country)
-    return row.loc[:, "2018"].values[0]
-
+corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath)
+mult = corona["mult"]
+critlow = corona["critlow"]
 nctry = len(countries)
-corona = dict()
-for country in countries:
-    ctryd = dict()
-    corona[country] = ctryd
-    ctryd['name'] = country
-    ctryd['population'] = read_pop(data_pop, country)
-    ctryd['cnf'] = read_cases(data_confirmed, country)
-    ctryd['dth'] = read_cases(data_deaths, country)
-    ctryd['rec'] = read_cases(data_recovered, country)
+dates = corona["dates"]
 
-##### scaling factor for cases, i.e., "x per mult" ######
-mult=1e6
-critlow = 10*1e-6 # for time zero, using confirmed
-#critlow = 0.1*1e-6 # for time zero, using deaths
-
-# normalization and smoothing
-def per_capita(ctryd, mult=mult, criteria=critlow):
-    """
-    calculate per capita cases (confirmed, deaths, and recovered)
-
-    """
-    pop = ctryd["population"]
-    ctryd["cnf_pc"] = ctryd["cnf"]/pop*mult
-    ctryd["dth_pc"] = ctryd["dth"]/pop*mult
-    ctryd["rec_pc"] = ctryd["rec"]/pop*mult
-    return 
-def time_zero(dates, ctryd, mult=mult, criteria=critlow):
-    """
-    shift elapsed time to specified number of _smoothed per-capita cases_
-    """
-    criteval = ctryd["cnf_pc_h"] > criteria*mult # use confirmed metric for time zero
-    #criteval = ctryd["dth_pc"] > criteria*mult # use death metric for time zero
-    idx0 = np.nonzero(criteval)[0][0]
-    ctryd["idx0"] = idx0
-    ctryd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
-    return
-
-days = (dates - dates[0]).astype('timedelta64[D]').values
-lmbd=5e-5 # smoothing parameter
-for country in countries:
-    ctryd = corona[country]
-    # compute per-capita
-    per_capita(ctryd)
-    # smoothing
-    if False:
-        # smoothing, unconstrained
-        ctryd['cnf_pc_h'] = ds.smooth_data(days, ctryd['cnf_pc'], d=2, lmbd=lmbd)
-        ctryd['dth_pc_h'] = ds.smooth_data(days, ctryd['dth_pc'], d=2, lmbd=lmbd)
-    else:
-        # smoothing, with constraints
-        # constrain cases to be non-negative
-        Aones = -np.eye(ndays)
-        bzero = np.zeros((ndays,1))
-        # constrain cases to be always increasing
-        D = -ds.derivative_matrix(days,1)
-        bdzero = np.zeros((ndays-1,1))
-        Aiq = np.vstack((Aones,D))
-        biq = np.vstack((bzero, bdzero))
-        ctryd['cnf_pc_h'] = ds.smooth_data_constr(days, ctryd['cnf_pc'], 2, lmbd, (Aiq,biq))
-        ctryd['dth_pc_h'] = ds.smooth_data_constr(days, ctryd['dth_pc'], 2, lmbd, (Aiq,biq))
-    # set time-zero and create elapsed time
-    time_zero(dates, ctryd)
-    
 # compute exponential fit 
 def expfit(t, y):
     """
@@ -166,17 +62,10 @@ for country in countries:
     ctryd['dt2in'] = dt2in
     ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
     
-# determine rates
-for country in countries:
-    ctryd = corona[country]
-    # take the derivative
-    ctryd['cnf_rate'] = deriv1_fd(ctryd['cnf_pc_h'], ctryd['days'], central=True)
-    ctryd['dth_rate'] = deriv1_fd(ctryd['dth_pc_h'], ctryd['days'], central=True)
-
 ### plotting ###
 ion()
 clr = ['C%g' % i for i in range(10)]
-sbl = ["o", "s", "v", "d", "h"]
+sbl = ["o", "s", "v", "d", "x"]
 savefigs = False
 
 # get inverse human readable form for t=0 criterium
@@ -322,7 +211,7 @@ for i in range(nctry):
 axis(xmin = -5)
 xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
 #xlabel('days since %i deaths per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("case-fatality ratio")
+ylabel("case-fatality ratio [%]")
 legend(loc="best")
 if savefigs:
     savefig("temp.png", bbox_inches="tight")
