@@ -29,7 +29,7 @@ from covid19ts import covid19_global
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-countries = ["US", "Italy", "Spain", "Iran"]
+countries = ["US", "Italy", "Spain", "Germany", "Iran"]
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
@@ -61,7 +61,22 @@ for country in countries:
     ctryd['k'] = k
     ctryd['dt2in'] = dt2in
     ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
-    
+
+# estimate "active" cases, then recovered and compare to "recovered" data
+# estimate of recovery time from:
+# - https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
+# - https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
+rectime = 14 # days, 1 day = 1 data point
+for country in countries:
+    ctryd = corona[country]
+    # calculate active cased based on JH data
+    ctryd["acv_pc"] = ctryd["cnf_pc"] - ctryd["dth_pc"] - ctryd["rec_pc"]
+    # estimate active cases based on an "average" recovery time
+    ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
+    ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
+    # recovered estimate -- not sure of the value of this...
+    ctryd["recest_pc"] = ctryd["cnf_pc"] - ctryd["dth_pc"] - ctryd["acv_pc"]
+
 ### plotting ###
 ion()
 clr = ['C%g' % i for i in range(10)]
@@ -241,3 +256,33 @@ legend(handles, labels, loc='best')
 if savefigs:
     savefig("temp.pdf", bbox_inches="tight")
 
+# active per capita
+N+=1; figure(N)
+clf()
+for i in range(nctry):
+    ctryd = corona[countries[i]]
+    days = ctryd["days"]
+    plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
+    plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
+#scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
+axis(xmin=-5)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
+ylabel("active per $10^%i$" % np.log10(mult))
+legend(loc='best')
+if True:
+    savefig("active_pc.pdf", bbox_inches="tight")
+    savefig("active_pc.png", bbox_inches="tight")
+
+# # recovered per capita
+# N+=1; figure(N)
+# clf()
+# for i in range(nctry):
+#     ctryd = corona[countries[i]]
+#     days = ctryd["days"]
+#     plot(days, ctryd["rec_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
+#     plot(days, ctryd["recest_pc"], "-"+clr[i])
+# #scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
+# axis(xmin=-5)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+# xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
+# ylabel("recovered per $10^%i$" % np.log10(mult))
+# legend(loc='best')

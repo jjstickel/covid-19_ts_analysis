@@ -84,6 +84,23 @@ for country in countries:
     ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
 ```
 
+*Calculate* "active" cases by $a = c - d -r$ ($a=$ active, $c=$ confirmed, $d=$ deaths, and $r=$ recovered). Also, *estimate* active cases by presuming all confirmed cases have recovered or died in an aeverage number of days. Estimate of recovery time from:
+- https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
+- https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
+
+```python
+rectime = 14 # days, 1 day = 1 data point -- you can change this number to see the affect on estimated acive cases
+for country in countries:
+    ctryd = corona[country]
+    # calculate active cased based on JH data
+    ctryd["acv_pc"] = ctryd["cnf_pc"] - ctryd["dth_pc"] - ctryd["rec_pc"]
+    # estimate active cases based on an "average" recovery time
+    ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
+    ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
+    # recovered estimate -- not sure of the value of this...
+    ctryd["recest_pc"] = ctryd["cnf_pc"] - ctryd["dth_pc"] - ctryd["acv_pc"]
+```
+
 # Plotting
 
 ```python
@@ -213,21 +230,36 @@ title("growth rate of deaths");
 Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates for some countries have decreased from their peak but seem to have continued linear growth (i.e., a flat rate). 
 
 
-# Case fatality ratio
+# Active cases and case fatality ratio (CFR)
 
 ```python
-N+=1; figure(N, figsize=(fw,fh))
+N+=1; figure(N, figsize=(2*fw,fh))
 clf()
+subplot(121)
+for i in range(nctry):
+    ctryd = corona[countries[i]]
+    days = ctryd["days"]
+    plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
+    plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
+#scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
+axis(xmin=-5)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
+ylabel("active per $10^%i$" % np.log10(mult))
+legend(loc='best')
+title("active cases")
+subplot(122)
 for i in range(nctry):
     ctryd = corona[countries[i]]
     plot(ctryd["days"], ctryd["dth_pc_h"]/ctryd["cnf_pc_h"]*100, "-"+sbl[i]+clr[i], mfc='none',
          mew=1.5, label=ctryd["name"])
-axis(xmin = -5, ymax=20)
+axis(xmin = -5, ymax=15)
 xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
 ylabel("case-fatality ratio [%]")
 legend(loc="best")
 title("case fatality ratio (CFR)");
 ```
+
+Have we peaked? A curve of active cases would help us answer this. Active cases can be calculated easily from data from confirmed, deaths, and recovered. Unfortunately, data for recovered cases is still not very good ([see here](https://www.cnn.com/2020/04/04/health/recovery-coronavirus-tracking-data-explainer/index.html)). For that reason, I also estimate active cases by presuming that all confirmed cases are resolved (dead or recovered) in an average number of days (I estimated recovery time to be 14 days based on the links I provided above). The symbols are the calculated active cases and the lines are the estimated active cases. By the estimated numbers, some countries have peaked, but definitely not the US yet (as of 4/11/20).
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. There is a lot of talk about how we are not doing enough testing and that the confirmed numbers are low. Therefore, more testing would increase the denominator of the ratio and would make the CFR *even lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
