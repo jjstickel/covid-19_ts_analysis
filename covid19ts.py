@@ -6,6 +6,8 @@ https://github.com/CSSEGISandData/COVID-19)
 
 """
 
+## TODO:
+# - check and correct for double counting of cities? e.g. New York City
 
 import numpy as np
 import pandas as pd
@@ -32,20 +34,15 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     - determine rates (i.e., the derivative) for cases
 
     Optional arguments:
-    websource:      whether to get time-series data from the web source or local file
-    JHCSSEpath:     path to the local file if websource=False
+    websource:      whether to get time-series data from the web source or local files
+    JHCSSEpath:     path to the local files if websource=False
     file_pop:       path to the population file (default is provided)
     mult:           scaling factor for the data, default is 1e6
     critlow:        cutoff criteria for time zero, default is 10e-6
     """
     
     # read in Johns Hopkins' data tables
-    if websource:
-        pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
-    elif JHCSSEpath is None:
-        raise ValueError("If websource=False, you need to provide a path for the JH CSSE data")
-    else:
-        pathname = JHCSSEpath
+    pathname = setup_path(websource, JHCSSEpath)
     # read in global data
     data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
     data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
@@ -54,12 +51,12 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     # check at some point
     header = data_confirmed.columns.values
     dates = pd.to_datetime(header[4:])
-    ndays = dates.size
 
     # read in population data (source: https://data.worldbank.org/indicator/sp.pop.totl)
     data_pop = pd.read_csv(file_pop, header=4)
 
     corona = dict()
+    corona["locs"] = countries # I'm not sure if I like this approach... JJS 4/15/20
     for country in countries:
         ctryd = dict()
         corona[country] = ctryd
@@ -72,43 +69,89 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     corona["mult"] = mult
     corona["critlow"] = critlow
     corona["dates"] = dates
+
+    perform_operations(corona)
     
-    days = (dates - dates[0]).astype('timedelta64[D]').values
-    lmbd=5e-5 # smoothing parameter
-    for country in countries:
-        ctryd = corona[country]
-        # compute per-capita
-        per_capita(ctryd)
-        # smoothing
-        if False:
-            # smoothing, unconstrained
-            ctryd['cnf_pc_h'] = ds.smooth_data(days, ctryd['cnf_pc'], d=2, lmbd=lmbd)
-            ctryd['dth_pc_h'] = ds.smooth_data(days, ctryd['dth_pc'], d=2, lmbd=lmbd)
-        else:
-            # smoothing, with constraints
-            # constrain cases to be non-negative
-            Aones = -np.eye(ndays)
-            bzero = np.zeros((ndays,1))
-            # constrain cases to be always increasing
-            D = -ds.derivative_matrix(days,1)
-            bdzero = np.zeros((ndays-1,1))
-            Aiq = np.vstack((Aones,D))
-            biq = np.vstack((bzero, bdzero))
-            ctryd['cnf_pc_h'] = ds.smooth_data_constr(days, ctryd['cnf_pc'], 2, lmbd,
-                                                      (Aiq,biq))
-            ctryd['dth_pc_h'] = ds.smooth_data_constr(days, ctryd['dth_pc'], 2, lmbd,
-                                                      (Aiq,biq))
-        # set time-zero and create elapsed time
-        time_zero(dates, ctryd)
-
-    # determine rates
-    for country in countries:
-        ctryd = corona[country]
-        # take the derivative
-        ctryd['cnf_rate'] = deriv1_fd(ctryd['cnf_pc_h'], ctryd['days'], central=True)
-        ctryd['dth_rate'] = deriv1_fd(ctryd['dth_pc_h'], ctryd['days'], central=True)
-
     return corona
+
+
+def covid19_US(locations, websource=True, JHCSSEpath=None, mult=mult, critlow=critlow):
+    """
+    Read in Johns Hopkins CSSE COVID-19 timeseries data for the US locations
+    specified and perform these operations:
+    - normalize cases to be per capita
+    - smooth the cases data
+    - set time-zero for each location and shift elapsed time in days
+    - determine rates (i.e., the derivative) for cases
+    
+    `locations` argument should be a list of location names in the form of
+    `state` OR `county, state`.
+    
+    Optional arguments:
+    websource:      whether to get time-series data from the web source or local files
+    JHCSSEpath:     path to the local files if websource=False
+    mult:           scaling factor for the data, default is 1e6
+    critlow:        cutoff criteria for time zero, default is 10e-6
+
+    """
+    
+    # read in Johns Hopkins' data tables
+    pathname = setup_path(websource, JHCSSEpath)
+    # read in US data
+    data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_US.csv")
+    data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_US.csv")
+    # presume these files all have a known "fixed" structure -- could put in a
+    # check at some point
+    header = data_confirmed.columns.values
+    dates = pd.to_datetime(header[11:]) # note:  data_deaths has an extra population column
+
+    corona = dict()
+    corona["locs"] = locations # I'm not sure if I like this approach... JJS 4/15/20
+    for loc in locations:
+        locd = dict()
+        corona[loc] = locd
+        locd['name'] = loc
+        # handle data handling differently by whether location is a state or
+        # county--if a state, then need to read in all the state entries and
+        # sum
+        if "," in loc: # it's a county
+            idx = loc.find(",")
+            county = loc[:idx]
+            state = loc[idx+2:]
+            loc_bool = np.logical_and(data_deaths["Admin2"] == county,
+                                      data_deaths["Province_State"] == state)
+            if loc_bool.sum() != 1:
+                raise Exception("%s is not in the data files, or occurs more than once"
+                                % loc)
+            #locd["population"] = data_deaths[loc_bool]["Population"].values[0]
+            #locd["cnf"] = data_confirmed[loc_bool].iloc[0,11:].values
+            #locd["dth"] = data_deaths[loc_bool].iloc[0,12:].values
+        else: # it's a state
+            loc_bool = data_deaths["Province_State"] == loc
+            if loc_bool.sum() < 1:
+                raise Exception("%s is not in the data files" % loc)
+        # these lines should work even for county location with single line...
+        locd["population"] = data_deaths[loc_bool]["Population"].sum()
+        locd["cnf"] = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)
+        locd["dth"] = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)
+
+    corona["mult"] = mult
+    corona["critlow"] = critlow
+    corona["dates"] = dates
+
+    perform_operations(corona)
+    
+    return corona
+
+
+def setup_path(websource, JHCSSEpath):
+    if websource:
+        pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+    elif JHCSSEpath is None:
+        raise ValueError("If websource=False, you need to provide a path for the JH CSSE data")
+    else:
+        pathname = JHCSSEpath
+    return pathname
 
 def read_cases(data, country):
     """
@@ -133,29 +176,72 @@ def read_pop(data, country):
     return row.loc[:, "2018"].values[0]
 
 # normalization and smoothing
-def per_capita(ctryd, mult=mult, criteria=critlow):
+def per_capita(locd, mult=mult, criteria=critlow):
     """
     calculate per capita cases (confirmed, deaths, and recovered)
 
     """
-    pop = ctryd["population"]
-    ctryd["cnf_pc"] = ctryd["cnf"]/pop*mult
-    ctryd["dth_pc"] = ctryd["dth"]/pop*mult
-    ctryd["rec_pc"] = ctryd["rec"]/pop*mult
+    pop = locd["population"]
+    locd["cnf_pc"] = locd["cnf"]/pop*mult
+    locd["dth_pc"] = locd["dth"]/pop*mult
+    if "rec" in locd.keys():
+        locd["rec_pc"] = locd["rec"]/pop*mult
     return
 
-def time_zero(dates, ctryd, mult=mult, criteria=critlow):
+def time_zero(dates, locd, mult=mult, criteria=critlow):
     """
     shift elapsed time to specified number of _smoothed per-capita cases_
     """
-    criteval = ctryd["cnf_pc_h"] > criteria*mult # use confirmed metric for time zero
-    #criteval = ctryd["dth_pc"] > criteria*mult # use death metric for time zero
+    criteval = locd["cnf_pc_h"] > criteria*mult # use confirmed metric for time zero
+    #criteval = locd["dth_pc"] > criteria*mult # use death metric for time zero
     idx0 = np.nonzero(criteval)[0][0]
-    ctryd["idx0"] = idx0
-    ctryd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
+    locd["idx0"] = idx0
+    locd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
     return
 
+def perform_operations(corona):
+    """
+    perform the smoothing, per capita, time shift, and derivative operations
+    """
+    
+    locs = corona["locs"]
+    dates = corona["dates"]
+    ndays = dates.size
 
+    days = (dates - dates[0]).astype('timedelta64[D]').values
+    lmbd=5e-5 # smoothing parameter
+    for loc in locs:
+        locd = corona[loc]
+        # compute per-capita
+        per_capita(locd)
+        # smoothing
+        if False:
+            # smoothing, unconstrained
+            locd['cnf_pc_h'] = ds.smooth_data(days, locd['cnf_pc'], d=2, lmbd=lmbd)
+            locd['dth_pc_h'] = ds.smooth_data(days, locd['dth_pc'], d=2, lmbd=lmbd)
+        else:
+            # smoothing, with constraints
+            # constrain cases to be non-negative
+            Aones = -np.eye(ndays)
+            bzero = np.zeros((ndays,1))
+            # constrain cases to be always increasing
+            D = -ds.derivative_matrix(days,1)
+            bdzero = np.zeros((ndays-1,1))
+            Aiq = np.vstack((Aones,D))
+            biq = np.vstack((bzero, bdzero))
+            locd['cnf_pc_h'] = ds.smooth_data_constr(days, locd['cnf_pc'], 2, lmbd,
+                                                      (Aiq,biq))
+            locd['dth_pc_h'] = ds.smooth_data_constr(days, locd['dth_pc'], 2, lmbd,
+                                                      (Aiq,biq))
+        # set time-zero and create elapsed time
+        time_zero(dates, locd)
+
+    # determine rates
+    for loc in locs:
+        locd = corona[loc]
+        # take the derivative
+        locd['cnf_rate'] = deriv1_fd(locd['cnf_pc_h'], locd['days'], central=True)
+        locd['dth_rate'] = deriv1_fd(locd['dth_pc_h'], locd['days'], central=True)
 
 
 def is_even(val):

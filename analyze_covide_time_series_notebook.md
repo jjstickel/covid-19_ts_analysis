@@ -27,19 +27,26 @@ Click on this link for a web-based "live" notebook (it may take awhile to load, 
 ```python
 # import modules
 import numpy as np
-from decimal import Decimal
-from datetime import datetime
-from matplotlib.pyplot import *
-import matplotlib.dates as mdates
-from covid19ts import covid19_global
+# locally defined modules
+from covid19ts import covid19_global, covid19_US
+import covid_plots as cvp
 ```
 
 # User input
 
-Put up to 5 countries of interest in this list. Must be the same name used in the JH global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception)
+Put up to 5 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
 
 ```python
 countries = ["US", "Italy", "Spain", "Germany", "Iran"]
+```
+
+Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be the same name used in the J-H US files. 
+
+NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data files. To get state data, I sum all the state entries, which, for for a few states, double-counts numbers when they are given as both county and city entries. The affect is muted when showing per-capita numbers, but cities will still have extra weighting over rural areas as a consequence.
+
+```python
+US_locs = ["Colorado", "California", "New York", "Washington"]
+#US_locs = ["Colorado", "California", "New York", "New York, New York"] # example with a city, `New York, New York`
 ```
 
 Read in Johns Hopkins CSSE COVID-19 timeseries data for the locations specified and perform these operations:
@@ -49,13 +56,18 @@ Read in Johns Hopkins CSSE COVID-19 timeseries data for the locations specified 
 - determine rates (i.e., the derivative) for cases
 
 ```python
+# global data
 corona = covid19_global(countries)
-
 # extract common variables for ease-of-use
 mult = corona["mult"]
 critlow = corona["critlow"]
 nctry = len(countries)
 dates = corona["dates"]
+# US data
+coronaUS = covid19_US(US_locs)
+if not np.alltrue(corona["dates"] == coronaUS["dates"]):
+    raise ValueError("the dates from the global and US files do not match")
+nUSloc = len(US_locs)
 ```
 
 Determine an exponential fit for the early part of the confirmed cases. As will be observed in the plots, it does not take very long before the growth of cases slows from exponential. Initial doubling time is printed out after the code block.
@@ -88,6 +100,8 @@ for country in countries:
 - https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
 - https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
 
+Recovered data is not available for internal US locations, and so only an estimate of active cases is calculated.
+
 ```python
 rectime = 14 # days, 1 day = 1 data point -- you can change this number to see the affect on estimated acive cases
 for country in countries:
@@ -99,218 +113,87 @@ for country in countries:
     ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
     # recovered estimate -- not sure of the value of this...
     ctryd["recest_pc"] = ctryd["cnf_pc"] - ctryd["dth_pc"] - ctryd["acv_pc"]
+for loc in US_locs:
+    locd = coronaUS[loc]
+    locd["acvest_pc"] = locd["cnf_pc"].copy()
+    locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
 ```
 
 # Plotting
 
 ```python
-# plotting setup
+# plot setup
 rcParams.update({'font.size': 14})
-fw = 8
-fh = 6
-clr = ['C%g' % i for i in range(10)]
-sbl = ["o", "s", "v", "d", "x"]
-savefigs = False
-
-# get inverse human readable form for t=0 criterium
-clinv_tup = Decimal("%.1g"%(1/critlow)).as_tuple()
-clinv_dig = clinv_tup.digits[0]
-clinv_exp = clinv_tup.exponent
-
-N=0 # figure counter
+cvp.fw = 8
+cvp.fh = 6
+cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 ```
 
 # Total cases (confirmed and deaths), not scaled
 
 ```python
-N+=1; figure(N, figsize=(2*fw,fh))
-clf()
-subplot(121)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    population = ctryd['population']
-    plot(dates, ctryd['cnf'], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-    #plot(dates, ctryd['cnf_expfit']*population/mult, '--'+clr[i], lw=1.5)
-    plot(dates, ctryd['cnf_pc_h']*population/mult, '-'+clr[i])
-ax = gca()
-ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%m/%d"))
-setp(ax.get_xticklabels(), rotation=30, ha="right")
-cnf_max = max([corona[country]['cnf'].max() for country in countries])
-axis(xmin = datetime(year=2020, month=2, day = 15), ymin=0-cnf_max*0.1, ymax = cnf_max*1.1)
-xlabel("date [m/d]")
-ylabel("confirmed")
-legend(loc='best')
-title("confirmed cases")
-
-subplot(122)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    population = ctryd['population']
-    plot(dates, ctryd['dth'], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-    plot(dates, ctryd['dth_pc_h']*population/mult, '-'+clr[i])
-ax = gca()
-ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%m/%d"))
-setp(ax.get_xticklabels(), rotation=30, ha="right")
-dth_max = max([corona[country]['dth'].max() for country in countries])
-axis(xmin = datetime(year=2020, month=2, day = 15), ymin=0-dth_max*0.1, ymax = dth_max*1.1)
-xlabel("date [m/d]")
-ylabel("deaths")
-legend(loc='best')
-title("deaths");
+cvp.total_global_plot(corona)
 ```
 
-Points are the data, lines are smoothing fit. 
+Points are the data, lines are smoothing fit. I did not create this plot for US locations because the scale differences would render it not very useful.
 
 
 # Per capita cases (confirmed and deaths) with elapsed number of days from a specified time zero as indicated in the x-axis
 
 ```python
-N+=1; figure(N, figsize=(2*fw,fh))
-clf()
-subplot(121)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    days = ctryd["days"]
-    plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-    plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=1.5)
-    plot(days, ctryd["cnf_pc_h"], '-'+clr[i])
-scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
-axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("confirmed per $10^%i$" % np.log10(mult))
-legend(loc='best')
-title("confirmed per capita")
-
-subplot(122)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    days = ctryd["days"]
-    plot(days, ctryd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-    plot(days, ctryd["dth_pc_h"], '-'+clr[i])
-scaled_max = max([corona[country]['dth_pc'].max() for country in countries])
-axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("deaths per $10^%i$" % np.log10(mult))
-legend(loc='best')
-title("deaths per capita");
+cvp.per_capita_global_plot(corona)
 ```
 
 On a per capita basis, the US is actually fairing OK compared to some European countries (e.g., Spain and Italy). The dashed lines are exponential fits to the early-time confirmed cases. Despite all the talk about COVID-19 growing exponentially, exponential growth did not last very long at all. Now growth is linear or sublinear for many countries, as will be shown in the subsequent plots of *growth rates*.
+
+```python
+cvp.per_capita_US_plot(coronaUS, corona)
+```
+
+US local per capita data.
 
 
 # Per capita growth rates (confirmed and deaths)
 
 ```python
-# rate confirmed per capita
-N+=1; figure(N, figsize=(2*fw,fh))
-clf()
-subplot(121)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    plot(ctryd["days"], ctryd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
-         label=ctryd["name"])
-axis(xmin = -5)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
-legend(loc="best")
-title("growth rate of confirmed cases")
-
-subplot(122)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    plot(ctryd["days"], ctryd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
-         label=ctryd["name"])
-axis(xmin = -5)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
-legend(loc="best")
-title("growth rate of deaths");
+cvp.rate_global_plot(corona)
 ```
 
 Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates for some countries have decreased from their peak but seem to have continued linear growth (i.e., a flat rate). 
+
+```python
+cvp.rate_US_plot(coronaUS, corona)
+```
+
+US local rate data.
 
 
 # Active cases and case fatality ratio (CFR)
 
 ```python
-N+=1; figure(N, figsize=(2*fw,fh))
-clf()
-subplot(121)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    days = ctryd["days"]
-    plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-    plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
-#scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
-axis(xmin=-5)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("active per $10^%i$" % np.log10(mult))
-legend(loc='best')
-title("active cases")
-subplot(122)
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    plot(ctryd["days"], ctryd["dth_pc_h"]/ctryd["cnf_pc_h"]*100, "-"+sbl[i]+clr[i], mfc='none',
-         mew=1.5, label=ctryd["name"])
-axis(xmin = -5, ymax=15)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("case-fatality ratio [%]")
-legend(loc="best")
-title("case fatality ratio (CFR)");
+cvp.active_CFR_global_plot(corona)
 ```
 
 Have we peaked? A curve of active cases would help us answer this. Active cases can be calculated easily from data from confirmed, deaths, and recovered. Unfortunately, data for recovered cases is still not very good ([see here](https://www.cnn.com/2020/04/04/health/recovery-coronavirus-tracking-data-explainer/index.html)). For that reason, I also estimate active cases by presuming that all confirmed cases are resolved (dead or recovered) in an average number of days (I estimated recovery time to be 14 days based on the links I provided above). The symbols are the calculated active cases and the lines are the estimated active cases. By the estimated numbers, some countries have peaked, but definitely not the US yet (as of 4/11/20).
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. There is a lot of talk about how we are not doing enough testing and that the confirmed numbers are low. Therefore, more testing would increase the denominator of the ratio and would make the CFR *even lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
+```python
+cvp.active_CFR_US_plot(coronaUS, corona)
+```
+
+US local active cases and CFR. Active cases are only calculated by the estimation formula.
+
 
 # Some other plots
 
 ```python
-# log-scale confirmed per capita
-N+=1; figure(N, figsize=(fw,fh))
-clf()
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    semilogy(ctryd["days"], ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5,
-             label=ctryd["name"])
-    semilogy(ctryd["days"], ctryd["cnf_expfit"], '--'+clr[i], lw=1.5)
-    semilogy(ctryd["days"], ctryd["cnf_pc_h"], '-'+clr[i])
-axis(xmin=-5, ymin=1e-3)
-xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-ylabel("confirmed per $10^%i$" % np.log10(mult))
-legend(loc='best')
-title("per capita confirmed, log scale");
+cvp.log_confirmed_plot(corona)
 ```
 
 This plot shows confirmed cases (per capita) on a semilog scale. A number of plots shown on the web are on a log scale like this, which would make sense if growth was truly exponential (the dashed lines are the exponential fits and appear linear here). Since growth is not exponential for long, I personally do not think using a log scale is appropriate. Most people without scientific training have a hard time interpreting log-scale figures.
 
 ```python
-# confirmed per-capita cases and deaths on one graph
-N+=1; figure(N, figsize=(fw,fh))
-clf()
-ax1 = subplot(111)
-ax2 = ax1.twinx()
-for i in range(nctry):
-    ctryd = corona[countries[i]]
-    days = ctryd["days"]
-    ax1.plot(days, ctryd["cnf_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
-             label=ctryd["name"])
-    ax2.plot(days, ctryd["dth_pc"], ":"+sbl[i]+clr[i], mfc='none', mew=1.5, ms=3)
-cnf_max = max([corona[country]['cnf_pc'].max() for country in countries])
-dth_max = max([corona[country]['dth_pc'].max() for country in countries])
-ax1.axis(xmin=-5, ymin=0-cnf_max*0.1, ymax=cnf_max*1.1)
-ax2.axis(xmin=-5, ymin=0-dth_max*0.1, ymax=dth_max*1.1)
-ax1.set_xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
-#ax1.set_xlabel('days since %i deaths per $10^%i$' % (clinv_dig, clinv_exp))
-ax1.set_ylabel("confirmed per $10^%i$" % np.log10(mult))
-ax2.set_ylabel("deaths per $10^%i$" % np.log10(mult))
-handles, labels = ax1.get_legend_handles_labels()
-legend(handles, labels, loc='best')
-title("per capita confirmed and deaths on one graph");
+cvp.confirmed_deaths_simul_global_plot(corona)
 ```
 This plot compares the trends of confirmed cases vs. deaths. Larger points and solid lines are confirmed, and smaller points and dotted lines are deaths.
-
-```python
-
-```
