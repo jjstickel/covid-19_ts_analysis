@@ -15,7 +15,7 @@ Dependencies are:
 - `numpy`
 - `pandas`
 - `matplotlib`
-- `cvxopt
+- `cvxopt`
 - `scikit.datasmooth` (can be pip installed)
 
 Also, `covid19ts` is part of this repository.
@@ -46,7 +46,8 @@ NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data f
 
 ```python
 US_locs = ["Colorado", "California", "New York", "Washington"]
-#US_locs = ["Colorado", "California", "New York", "New York, New York"] # example with a city, `New York, New York`
+# example list with a city location, `New York, New York`
+#US_locs = ["Colorado", "California", "New York", "New York, New York"]
 ```
 
 Read in Johns Hopkins CSSE COVID-19 timeseries data for the locations specified and perform these operations:
