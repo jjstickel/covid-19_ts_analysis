@@ -243,6 +243,7 @@ def per_capita_US_plot(coronaUS, corona, N=1):
     clf()
     subplot(121)
     plot(USd["days"], USd["cnf_pc"], sbl[0]+clr[0], mfc='none', mew=1.5, label=USd["name"])
+    plot(USd["days"], USd["cnf_pc_h"], "-"+clr[0], mfc='none', mew=1.5)
     for i in range(nUSloc):
         j = i+1
         locd = coronaUS[US_locs[i]]
@@ -257,6 +258,7 @@ def per_capita_US_plot(coronaUS, corona, N=1):
     title("confirmed per capita")
     subplot(122)
     plot(USd["days"], USd["dth_pc"], sbl[0]+clr[0], mfc='none', mew=1.5, label=USd["name"])
+    plot(USd["days"], USd["dth_pc_h"], "-"+clr[0], mfc='none', mew=1.5)
     for i in range(nUSloc):
         j = i+1
         locd = coronaUS[US_locs[i]]

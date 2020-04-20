@@ -24,7 +24,7 @@ critlow = 10*1e-6 # for time zero, using confirmed
 
 
 def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile, mult=mult,
-                   critlow=critlow):
+                   critlow=critlow, lmbd=5e-5):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the countries
     specified and perform these operations:
@@ -39,6 +39,7 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     file_pop:       path to the population file (default is provided)
     mult:           scaling factor for the data, default is 1e6
     critlow:        cutoff criteria for time zero, default is 10e-6
+    lmbd:           smoothing parameter
     """
     
     # read in Johns Hopkins' data tables
@@ -70,12 +71,13 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     corona["critlow"] = critlow
     corona["dates"] = dates
 
-    perform_operations(corona)
+    perform_operations(corona, lmbd)
     
     return corona
 
 
-def covid19_US(locations, websource=True, JHCSSEpath=None, mult=mult, critlow=critlow):
+def covid19_US(locations, websource=True, JHCSSEpath=None, mult=mult, critlow=critlow,
+               lmbd=5e-5):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the US locations
     specified and perform these operations:
@@ -92,7 +94,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=mult, critlow=cr
     JHCSSEpath:     path to the local files if websource=False
     mult:           scaling factor for the data, default is 1e6
     critlow:        cutoff criteria for time zero, default is 10e-6
-
+    lmbd:           smoothing parameter
     """
     
     # read in Johns Hopkins' data tables
@@ -139,7 +141,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=mult, critlow=cr
     corona["critlow"] = critlow
     corona["dates"] = dates
 
-    perform_operations(corona)
+    perform_operations(corona, lmbd)
     
     return corona
 
@@ -199,9 +201,11 @@ def time_zero(dates, locd, mult=mult, criteria=critlow):
     locd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
     return
 
-def perform_operations(corona):
+def perform_operations(corona, lmbd):
     """
-    perform the smoothing, per capita, time shift, and derivative operations
+    Perform the smoothing, per capita, time shift, and derivative operations.
+    The argument `lmbd` is the smoothing parameter
+
     """
     
     locs = corona["locs"]
@@ -209,7 +213,6 @@ def perform_operations(corona):
     ndays = dates.size
 
     days = (dates - dates[0]).astype('timedelta64[D]').values
-    lmbd=5e-5 # smoothing parameter
     for loc in locs:
         locd = corona[loc]
         # compute per-capita

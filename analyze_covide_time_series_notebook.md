@@ -58,14 +58,15 @@ Read in Johns Hopkins CSSE COVID-19 timeseries data for the locations specified 
 
 ```python
 # global data
-corona = covid19_global(countries)
+lmbd = 1e-5 # smoothing parameter, larger means more smooth
+corona = covid19_global(countries, lmbd=lmbd)
 # extract common variables for ease-of-use
 mult = corona["mult"]
 critlow = corona["critlow"]
 nctry = len(countries)
 dates = corona["dates"]
 # US data
-coronaUS = covid19_US(US_locs)
+coronaUS = covid19_US(US_locs, lmbd=lmbd)
 if not np.alltrue(corona["dates"] == coronaUS["dates"]):
     raise ValueError("the dates from the global and US files do not match")
 nUSloc = len(US_locs)
