@@ -25,17 +25,19 @@ import covid_plots as cvp
 countries = ["US", "Italy", "Spain", "Germany", "Iran"]
 
 # now also process US locations
-US_locs = ["Colorado", "New York", "New York, New York"]
+US_locs = ["Colorado", "Washington", "California", "New York"]
+#US_locs = ["Colorado", "New York", "New York, New York"]
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
-corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath)
+lmbd = 1e-5
+corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
 mult = corona["mult"]
 critlow = corona["critlow"]
 nctry = len(countries)
 dates = corona["dates"]
 
-coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath)
+coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
 if not np.alltrue(corona["dates"] == coronaUS["dates"]):
     raise ValueError("the dates from the global and US files do not match")
 nUSloc = len(US_locs)
@@ -94,7 +96,7 @@ cvp.rate_global_plot(corona, N)
 N+=1
 cvp.active_CFR_global_plot(corona, N)
 N+=1
-cvp.log_confirmed_plot(corona, N)
+cvp.exp_fit_confirmed_plot(corona, N)
 N+=1
 cvp.confirmed_deaths_simul_global_plot(corona, N)
 N+=1

@@ -72,32 +72,6 @@ if not np.alltrue(corona["dates"] == coronaUS["dates"]):
 nUSloc = len(US_locs)
 ```
 
-Determine an exponential fit for the early part of the confirmed cases. As will be observed in the plots, it does not take very long before the growth of cases slows from exponential. Initial doubling time is printed out after the code block.
-
-```python
-# compute exponential fit to confirmed cases
-def expfit(t, y):
-    """
-    fit data to exponential function
-    """
-    k, lna = np.polyfit(t, np.log(y), 1)
-    return np.exp(lna), k
-
-crithigh = 200*1e-6 # upper bound for exponential fit, for fitting confirmed
-for country in countries:
-    ctryd = corona[country]
-    criteval = ctryd['cnf_pc'] < crithigh*mult
-    idx0 = ctryd['idx0']
-    idx1 = np.nonzero(criteval)[0][-1]
-    a, k = expfit(ctryd['days'][idx0:idx1], ctryd['cnf_pc'][idx0:idx1])
-    dt2in = np.log(2)/k
-    print("initial doubling time for %s was %g days" % (country, dt2in))
-    ctryd['a'] = a
-    ctryd['k'] = k
-    ctryd['dt2in'] = dt2in
-    ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
-```
-
 *Calculate* "active" cases by $a = c - d -r$ ($a=$ active, $c=$ confirmed, $d=$ deaths, and $r=$ recovered). Also, *estimate* active cases by presuming all confirmed cases have recovered or died in an aeverage number of days. Estimate of recovery time from:
 - https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
 - https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
@@ -146,7 +120,7 @@ Points are the data, lines are smoothing fit. I did not create this plot for US 
 cvp.per_capita_global_plot(corona)
 ```
 
-On a per capita basis, the US is actually fairing OK compared to some European countries (e.g., Spain and Italy). The dashed lines are exponential fits to the early-time confirmed cases. Despite all the talk about COVID-19 growing exponentially, exponential growth did not last very long at all. Now growth is linear or sublinear for many countries, as will be shown in the subsequent plots of *growth rates*.
+On a per capita basis, the US is actually fairing OK compared to some European countries (e.g., Spain and Italy). Growth is now linear or sublinear for many countries, as will be shown in the subsequent plots of *growth rates*. Some discussion of exponential growth is discussed below (near the end).
 
 ```python
 cvp.per_capita_US_plot(coronaUS, corona)
@@ -176,7 +150,7 @@ US local rate data.
 cvp.active_CFR_global_plot(corona)
 ```
 
-Have we peaked? A curve of active cases would help us answer this. Active cases can be calculated easily from data from confirmed, deaths, and recovered. Unfortunately, data for recovered cases is still not very good ([see here](https://www.cnn.com/2020/04/04/health/recovery-coronavirus-tracking-data-explainer/index.html)). For that reason, I also estimate active cases by presuming that all confirmed cases are resolved (dead or recovered) in an average number of days (I estimated recovery time to be 14 days based on the links I provided above). The symbols are the calculated active cases and the lines are the estimated active cases. By the estimated numbers, some countries have peaked, but definitely not the US yet (as of 4/11/20).
+Have we peaked? A curve of active cases would help us answer this. Active cases can be calculated easily from data from confirmed, deaths, and recovered. Unfortunately, data for recovered cases is still not very good ([see here](https://www.cnn.com/2020/04/04/health/recovery-coronavirus-tracking-data-explainer/index.html)). For that reason, I also estimate active cases by presuming that all confirmed cases are resolved (dead or recovered) in an average number of days (I estimated recovery time to be 14 days based on the links I provided above). The symbols are the calculated active cases and the lines are the estimated active cases. By the estimated numbers, some countries have peaked, and the US may have peaked recently (as of 4/20/20).
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. There is a lot of talk about how we are not doing enough testing and that the confirmed numbers are low. Therefore, more testing would increase the denominator of the ratio and would make the CFR *even lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
@@ -189,11 +163,38 @@ US local active cases and CFR. Active cases are only calculated by the estimatio
 
 # Some other plots
 
+
+Determine an exponential fit for the early part of the confirmed cases. As will be observed in the next plot, it does not take very long before the growth of cases slows from exponential. Initial doubling time is printed out after the code block.
+
 ```python
-cvp.log_confirmed_plot(corona)
+# compute exponential fit to confirmed cases
+def expfit(t, y):
+    """
+    fit data to exponential function
+    """
+    k, lna = np.polyfit(t, np.log(y), 1)
+    return np.exp(lna), k
+
+crithigh = 200*1e-6 # upper bound for exponential fit, for fitting confirmed
+for country in countries:
+    ctryd = corona[country]
+    criteval = ctryd['cnf_pc'] < crithigh*mult
+    idx0 = ctryd['idx0']
+    idx1 = np.nonzero(criteval)[0][-1]
+    a, k = expfit(ctryd['days'][idx0:idx1], ctryd['cnf_pc'][idx0:idx1])
+    dt2in = np.log(2)/k
+    print("initial doubling time for %s was %g days" % (country, dt2in))
+    ctryd['a'] = a
+    ctryd['k'] = k
+    ctryd['dt2in'] = dt2in
+    ctryd['cnf_expfit'] = a*np.exp(k*ctryd['days'])
 ```
 
-This plot shows confirmed cases (per capita) on a semilog scale. A number of plots shown on the web are on a log scale like this, which would make sense if growth was truly exponential (the dashed lines are the exponential fits and appear linear here). Since growth is not exponential for long, I personally do not think using a log scale is appropriate. Most people without scientific training have a hard time interpreting log-scale figures.
+```python
+cvp.exp_fit_confirmed_plot(corona)
+```
+
+The dashed lines are exponential fits to the early-time confirmed cases. Despite all the talk about COVID-19 growing exponentially, exponential growth did not last very long at all. This right plot shows confirmed cases (per capita) on a semilog scale. A number of plots shown on the web are on a log scale like this, which would make sense if growth was truly exponential (the dashed lines are the exponential fits and appear linear here). Since growth is not exponential for long, I personally do not think using a log scale is appropriate. Most people without scientific training have a hard time interpreting log-scale figures.
 
 ```python
 cvp.confirmed_deaths_simul_global_plot(corona)
