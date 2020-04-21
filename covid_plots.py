@@ -229,6 +229,7 @@ def confirmed_deaths_simul_global_plot(corona, N=1):
 
 
 ##### US plotting functions ####
+k = 4 # color shift so that US location colors are different from global colors
 
 def per_capita_US_plot(coronaUS, corona, N=1):
     # per capita cases
@@ -248,8 +249,8 @@ def per_capita_US_plot(coronaUS, corona, N=1):
         j = i+1
         locd = coronaUS[US_locs[i]]
         days = locd["days"]
-        plot(days, locd["cnf_pc"], sbl[j]+clr[j], mfc='none', mew=1.5, label=locd["name"])
-        plot(days, locd["cnf_pc_h"], '-'+clr[j])
+        plot(days, locd["cnf_pc"], sbl[j]+clr[j+k], mfc='none', mew=1.5, label=locd["name"])
+        plot(days, locd["cnf_pc_h"], '-'+clr[j+k])
     scaled_max = max([coronaUS[loc]['cnf_pc'].max() for loc in US_locs])
     axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -263,8 +264,8 @@ def per_capita_US_plot(coronaUS, corona, N=1):
         j = i+1
         locd = coronaUS[US_locs[i]]
         days = locd["days"]
-        plot(days, locd["dth_pc"], sbl[j]+clr[j], mfc='none', mew=1.5, label=locd["name"])
-        plot(days, locd["dth_pc_h"], '-'+clr[j])
+        plot(days, locd["dth_pc"], sbl[j]+clr[j+k], mfc='none', mew=1.5, label=locd["name"])
+        plot(days, locd["dth_pc_h"], '-'+clr[j+k])
     scaled_max = max([coronaUS[loc]['dth_pc'].max() for loc in US_locs])
     axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -289,7 +290,7 @@ def rate_US_plot(coronaUS, corona, N=1):
     for i in range(nUSloc):
         j = i+1
         locd = coronaUS[US_locs[i]]
-        plot(locd["days"], locd["cnf_rate"], "-"+sbl[j]+clr[j], mfc='none', mew=1.5,
+        plot(locd["days"], locd["cnf_rate"], "-"+sbl[j]+clr[j+k], mfc='none', mew=1.5,
              label=locd["name"])
     axis(xmin = -5)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -301,7 +302,7 @@ def rate_US_plot(coronaUS, corona, N=1):
     for i in range(nUSloc):
         j=i+1
         locd = coronaUS[US_locs[i]]
-        plot(locd["days"], locd["dth_rate"], "-"+sbl[j]+clr[j], mfc='none', mew=1.5,
+        plot(locd["days"], locd["dth_rate"], "-"+sbl[j]+clr[j+k], mfc='none', mew=1.5,
              label=locd["name"])
     axis(xmin = -5)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -328,7 +329,7 @@ def active_CFR_US_plot(coronaUS, corona, N=1):
         j=i+1
         locd = coronaUS[US_locs[i]]
         days = locd["days"]
-        plot(days, locd["acvest_pc"], "-"+sbl[j]+clr[j], lw=2, mfc='none',
+        plot(days, locd["acvest_pc"], "-"+sbl[j]+clr[j+k], lw=2, mfc='none',
              label=locd["name"])
     axis(xmin=-5)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -341,7 +342,7 @@ def active_CFR_US_plot(coronaUS, corona, N=1):
     for i in range(nUSloc):
         j=i+1
         locd = coronaUS[US_locs[i]]
-        plot(locd["days"], locd["dth_pc_h"]/locd["cnf_pc_h"]*100, "-"+sbl[j]+clr[j],
+        plot(locd["days"], locd["dth_pc_h"]/locd["cnf_pc_h"]*100, "-"+sbl[j]+clr[j+k],
              mfc='none', mew=1.5, label=locd["name"])
     axis(xmin = -5, ymax=15)
     xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
