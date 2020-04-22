@@ -48,6 +48,10 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
     data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
     data_recovered = pd.read_csv(pathname + "time_series_covid19_recovered_global.csv")
+    # convert some pesky NaN values (for missing labels) to strings
+    for data in [data_confirmed, data_deaths, data_recovered]:
+        data["Province/State"] = data["Province/State"].values.astype("str")
+
     # presume these files all have the same "fixed" structure -- could put in a
     # check at some point
     header = data_confirmed.columns.values
@@ -158,10 +162,11 @@ def setup_path(websource, JHCSSEpath):
 def read_cases(data, country):
     """
     Select country data values. The country data must be in a single row for the
-    current implementation.
+    current implementation. Not used for US locations.
     """
     # get the row for the country
-    c_bool = data["Country/Region"] == country
+    c_bool = np.logical_and(data["Province/State"] == "nan",
+                            data["Country/Region"] == country)
     c_data = data[c_bool]
     if c_data.shape[0] is 1:
         return np.squeeze(c_data.iloc[:,4:].values)
@@ -169,7 +174,7 @@ def read_cases(data, country):
         raise Exception("Not implemented:  there is more than one row (or no rows) of %s data." % country)
     
 def read_pop(data, country):
-    """ Get the population for a country """
+    """ Get the population for a country. Not used for US locations. """
     # There may be some name mismatches that need correction in the population
     # file -- please create an issue or pull request when you find them
     row = data[ data["Country Name"]==country ]

@@ -14,7 +14,6 @@ fw = 6
 fh = 4
 clr = ['C%g' % i for i in range(10)]
 sbl = ["o", "s", "v", "d", "x"]
-savefigs = False
 
 def critlow_readable(corona):
     # get inverse human readable form for t=0 criterium
@@ -73,7 +72,7 @@ def total_global_plot(corona, N=1):
     title("deaths");
     return
 
-def per_capita_global_plot(corona, N=1):
+def per_capita_global_plot(corona, N=1, savefigs=False):
     # per capita cases
     countries = corona["locs"]
     nctry = len(countries)
@@ -112,9 +111,10 @@ def per_capita_global_plot(corona, N=1):
     ylabel("deaths per $10^%i$" % np.log10(mult))
     legend(loc='best')
     title("deaths per capita");
+    if savefigs:  savefig("per_capita_global.pdf", bbox_inches="tight")
     return
 
-def rate_global_plot(corona, N=1):
+def rate_global_plot(corona, N=1, savefigs=False):
     # rate confirmed per capita
     countries = corona["locs"]
     nctry = len(countries)
@@ -146,9 +146,10 @@ def rate_global_plot(corona, N=1):
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
     legend(loc="best")
     title("growth rate of deaths");
+    if savefigs:  savefig("rate_global.pdf", bbox_inches="tight")
     return
 
-def active_CFR_global_plot(corona, N=1):
+def active_CFR_global_plot(corona, N=1, savefigs=False):
     # active and CFR
     countries = corona["locs"]
     nctry = len(countries)
@@ -181,6 +182,7 @@ def active_CFR_global_plot(corona, N=1):
     ylabel("case-fatality ratio [%]")
     legend(loc="best")
     title("case fatality ratio (CFR)");
+    if savefigs:  savefig("active_CFR_global.pdf", bbox_inches="tight")
     return
 
 def exp_fit_confirmed_plot(corona, N=1):

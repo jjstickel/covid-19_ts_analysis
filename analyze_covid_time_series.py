@@ -23,6 +23,7 @@ import covid_plots as cvp
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 countries = ["US", "Italy", "Spain", "Germany", "Iran"]
+#countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
 US_locs = ["Colorado", "Washington", "California", "New York"]
@@ -32,6 +33,7 @@ JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
 lmbd = 1e-5
 corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
+
 mult = corona["mult"]
 critlow = corona["critlow"]
 nctry = len(countries)
@@ -90,11 +92,11 @@ cvp.critlow_readable(corona) # provide convenient readable terms for time labeli
 N = 1
 cvp.total_global_plot(corona, N)
 N+=1
-cvp.per_capita_global_plot(corona, N)
+cvp.per_capita_global_plot(corona, N, savefigs=False)
 N+=1
-cvp.rate_global_plot(corona, N)
+cvp.rate_global_plot(corona, N, savefigs=False)
 N+=1
-cvp.active_CFR_global_plot(corona, N)
+cvp.active_CFR_global_plot(corona, N, savefigs=False)
 N+=1
 cvp.exp_fit_confirmed_plot(corona, N)
 N+=1
