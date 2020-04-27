@@ -22,7 +22,7 @@ import covid_plots as cvp
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-countries = ["US", "Italy", "Spain", "Germany", "Iran"]
+countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations

@@ -37,7 +37,7 @@ import covid_plots as cvp
 Put up to 5 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
 
 ```python
-countries = ["US", "Italy", "Spain", "Germany", "Iran"]
+countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
 ```
 
 Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be the same name used in the J-H US files. 
