@@ -45,7 +45,7 @@ Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be
 NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data files. To get state data, I sum all the state entries, which, for for a few states, double-counts numbers when they are given as both county and city entries. The affect is muted when showing per-capita numbers, but cities will still have extra weighting over rural areas as a consequence.
 
 ```python
-US_locs = ["Colorado", "California", "New York", "Washington"]
+US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
 # example list with a city location, `New York, New York`
 #US_locs = ["Colorado", "California", "New York", "New York, New York"]
 ```
@@ -58,7 +58,7 @@ Read in Johns Hopkins CSSE COVID-19 timeseries data for the locations specified 
 
 ```python
 # global data
-lmbd = 1e-5 # smoothing parameter, larger means more smooth
+lmbd = 5e-5 # smoothing parameter, larger means more smooth
 corona = covid19_global(countries, lmbd=lmbd)
 # extract common variables for ease-of-use
 mult = corona["mult"]

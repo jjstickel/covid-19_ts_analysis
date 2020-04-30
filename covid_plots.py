@@ -258,7 +258,7 @@ def confirmed_deaths_simul_global_plot(corona, N=1):
 ##### US plotting functions ####
 k = 4 # color shift so that US location colors are different from global colors
 
-def per_capita_US_plot(coronaUS, corona, N=1):
+def per_capita_US_plot(coronaUS, corona, N=1, savefigs=False):
     # per capita cases
     US_locs = coronaUS["locs"]
     nUSloc = len(US_locs)
@@ -301,9 +301,10 @@ def per_capita_US_plot(coronaUS, corona, N=1):
     ylabel("deaths per $10^%i$" % np.log10(mult))
     legend(loc='best')
     title("deaths per capita");
+    if savefigs:  savefig("per_capita_US.pdf", bbox_inches="tight")
     return
 
-def rate_US_plot(coronaUS, corona, N=1):
+def rate_US_plot(coronaUS, corona, N=1, savefigs=False):
     # rate confirmed per capita
     US_locs = coronaUS["locs"]
     nUSloc = len(US_locs)
@@ -342,9 +343,10 @@ def rate_US_plot(coronaUS, corona, N=1):
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
     legend(loc="best")
     title("growth rate of deaths");
+    if savefigs:  savefig("rate_US.pdf", bbox_inches="tight")
     return
 
-def active_CFR_US_plot(coronaUS, corona, N=1):
+def active_CFR_US_plot(coronaUS, corona, N=1, savefigs=False):
     # active and CFR
     US_locs = coronaUS["locs"]
     nUSloc = len(US_locs)
@@ -383,4 +385,5 @@ def active_CFR_US_plot(coronaUS, corona, N=1):
     ylabel("case-fatality ratio [%]")
     legend(loc="best")
     title("case fatality ratio (CFR)");
+    if savefigs:  savefig("active_CFR_US.pdf", bbox_inches="tight")
     return

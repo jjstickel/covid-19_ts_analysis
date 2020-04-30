@@ -26,12 +26,13 @@ countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
-US_locs = ["Colorado", "Washington", "California", "New York"]
+US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
+#US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
-lmbd = 1e-5
+lmbd = 5e-5
 corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
 
 mult = corona["mult"]
@@ -88,22 +89,23 @@ for loc in US_locs:
 
 
 # plotting
+saveplots = True
 cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 N = 1
 cvp.total_global_plot(corona, N)
 N+=1
-cvp.per_capita_global_plot(corona, N, savefigs=False)
+cvp.per_capita_global_plot(corona, N, savefigs=saveplots)
 N+=1
-cvp.rate_global_plot(corona, N, savefigs=False)
+cvp.rate_global_plot(corona, N, savefigs=saveplots)
 N+=1
-cvp.active_CFR_global_plot(corona, N, savefigs=False)
+cvp.active_CFR_global_plot(corona, N, savefigs=saveplots)
 N+=1
 cvp.exp_fit_confirmed_plot(corona, N)
 N+=1
 cvp.confirmed_deaths_simul_global_plot(corona, N)
 N+=1
-cvp.per_capita_US_plot(coronaUS, corona, N)
+cvp.per_capita_US_plot(coronaUS, corona, N, savefigs=saveplots)
 N+=1
-cvp.rate_US_plot(coronaUS, corona, N)
+cvp.rate_US_plot(coronaUS, corona, N, savefigs=saveplots)
 N+=1
-cvp.active_CFR_US_plot(coronaUS, corona, N)
+cvp.active_CFR_US_plot(coronaUS, corona, N, savefigs=saveplots)
