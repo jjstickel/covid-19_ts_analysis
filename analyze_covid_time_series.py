@@ -26,7 +26,8 @@ countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
-US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
+US_locs = ["Colorado", "New Mexico", "South Dakota", "California"]
+#US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
@@ -89,7 +90,7 @@ for loc in US_locs:
 
 
 # plotting
-saveplots = True
+saveplots = False
 cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 N = 1
 cvp.total_global_plot(corona, N)

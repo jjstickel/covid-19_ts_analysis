@@ -279,7 +279,9 @@ def per_capita_US_plot(coronaUS, corona, N=1, savefigs=False):
         days = locd["days"] - locd["days"][-1]
         plot(days, locd["cnf_pc"], sbl[j]+clr[j+k], mfc='none', mew=1.5, label=locd["name"])
         plot(days, locd["cnf_pc_h"], '-'+clr[j+k])
-    scaled_max = max([coronaUS[loc]['cnf_pc'].max() for loc in US_locs])
+    maxvals = [coronaUS[loc]['cnf_pc'].max() for loc in US_locs]
+    maxvals.append(USd["cnf_pc"].max())
+    scaled_max = max(maxvals)
     axis(xmin=days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % dates[-1].date())
     ylabel("confirmed per $10^%i$" % np.log10(mult))
@@ -295,7 +297,9 @@ def per_capita_US_plot(coronaUS, corona, N=1, savefigs=False):
         days = locd["days"] - locd["days"][-1]
         plot(days, locd["dth_pc"], sbl[j]+clr[j+k], mfc='none', mew=1.5, label=locd["name"])
         plot(days, locd["dth_pc_h"], '-'+clr[j+k])
-    scaled_max = max([coronaUS[loc]['dth_pc'].max() for loc in US_locs])
+    maxvals = [coronaUS[loc]['dth_pc'].max() for loc in US_locs]
+    maxvals.append(USd["dth_pc"].max())
+    scaled_max = max(maxvals)
     axis(xmin=days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % dates[-1].date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
