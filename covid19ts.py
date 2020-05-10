@@ -168,7 +168,7 @@ def read_cases(data, country):
     c_bool = np.logical_and(data["Province/State"] == "nan",
                             data["Country/Region"] == country)
     c_data = data[c_bool]
-    if c_data.shape[0] is 1:
+    if c_data.shape[0] == 1:
         return np.squeeze(c_data.iloc[:,4:].values)
     else:
         raise Exception("Not implemented:  there is more than one row (or no rows) of %s data." % country)
