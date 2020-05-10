@@ -99,7 +99,7 @@ for loc in US_locs:
 
 ```python
 # plot setup
-rcParams.update({'font.size': 14})
+cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
 cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
