@@ -22,14 +22,16 @@ import covid_plots as cvp
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
+countries = ["US", "Italy", "Sweden", "Russia", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
-US_locs = ["Colorado", "New Mexico", "Wyoming", "California"]
+US_locs = ["Colorado", "Wyoming", "South Dakota", "Wisconsin"]
 #US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
+
+saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
@@ -90,7 +92,6 @@ for loc in US_locs:
 
 
 # plotting
-saveplots = False
 cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 N = 1
 cvp.total_global_plot(corona, N)

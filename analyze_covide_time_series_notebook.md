@@ -37,7 +37,7 @@ import covid_plots as cvp
 Put up to 5 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
 
 ```python
-countries = ["US", "Italy", "Sweden", "Japan", "Iran"]
+countries = ["US", "Italy", "Sweden", "Russia", "Brazil"]
 ```
 
 Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be the same name used in the J-H US files. 
@@ -45,7 +45,7 @@ Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be
 NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data files. To get state data, I sum all the state entries, which, for for a few states, double-counts numbers when they are given as both county and city entries. The affect is muted when showing per-capita numbers, but cities will still have extra weighting over rural areas as a consequence.
 
 ```python
-US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
+US_locs = ["Colorado", "Wyoming", "South Dakota", "Wisconsin"]
 # example list with a city location, `New York, New York`
 #US_locs = ["Colorado", "California", "New York", "New York, New York"]
 ```
