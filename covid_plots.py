@@ -163,8 +163,10 @@ def active_CFR_global_plot(corona, N=1, savefigs=False):
     for i in range(nctry):
         ctryd = corona[countries[i]]
         days = ctryd["days"] - ctryd["days"][-1]
-        plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
+        #plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
+        plot(days, ctryd["acvest_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+             label=ctryd["name"])
+        #plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
     #scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
     axis(xmin=days_before)#, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % dates[-1].date())
