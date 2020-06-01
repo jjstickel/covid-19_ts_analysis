@@ -96,11 +96,11 @@ cvp.critlow_readable(corona) # provide convenient readable terms for time labeli
 N = 1
 cvp.total_global_plot(corona, N)
 N+=1
-cvp.per_capita_global_plot(corona, N, savefigs=saveplots)
+cvp.per_capita_global_plot(corona, N, savefigs=saveplots, days_before=75)
 N+=1
-cvp.rate_global_plot(corona, N, savefigs=saveplots)
+cvp.rate_global_plot(corona, N, savefigs=saveplots, days_before=75)
 N+=1
-cvp.active_CFR_global_plot(corona, N, savefigs=saveplots)
+cvp.active_CFR_global_plot(corona, N, savefigs=saveplots, days_before=75)
 N+=1
 cvp.exp_fit_confirmed_plot(corona, N)
 N+=1
