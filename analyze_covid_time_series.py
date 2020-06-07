@@ -26,7 +26,7 @@ countries = ["US", "Italy", "Sweden", "Russia", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
-US_locs = ["Colorado", "Wyoming", "South Dakota", "Wisconsin"]
+US_locs = ["Colorado", "South Dakota", "Minnesota", "Wisconsin"]
 #US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
