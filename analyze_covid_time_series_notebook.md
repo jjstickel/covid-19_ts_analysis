@@ -45,7 +45,7 @@ Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be
 NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data files. To get state data, I sum all the state entries, which, for for a few states, double-counts numbers when they are given as both county and city entries. The affect is muted when showing per-capita numbers, but cities will still have extra weighting over rural areas as a consequence.
 
 ```python
-US_locs = ["Colorado", "Wyoming", "South Dakota", "Wisconsin"]
+US_locs = ["Colorado", "South Dakota", "Minnesota", "Wisconsin"]
 # example list with a city location, `New York, New York`
 #US_locs = ["Colorado", "California", "New York", "New York, New York"]
 ```
