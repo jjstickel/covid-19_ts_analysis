@@ -45,7 +45,8 @@ Put up to 4 US locations (state, county, or city) in the `US_locs` list. Must be
 NOTE:  unfortunately, there are no pre-consolidated state data in the J-H data files. To get state data, I sum all the state entries, which, for for a few states, double-counts numbers when they are given as both county and city entries. The affect is muted when showing per-capita numbers, but cities will still have extra weighting over rural areas as a consequence.
 
 ```python
-US_locs = ["Colorado", "South Dakota", "Minnesota", "Wisconsin"]
+US_locs = ["Colorado", "Minnesota", "North Carolina", "Arizona"]
+#US_locs = ["Colorado", "South Dakota", "Minnesota", "Wisconsin"]
 # example list with a city location, `New York, New York`
 #US_locs = ["Colorado", "California", "New York", "New York, New York"]
 ```
@@ -99,6 +100,7 @@ for loc in US_locs:
 
 ```python
 # plot setup
+dbf = 60 # days before today the time axes
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
@@ -117,13 +119,13 @@ Points are the data, lines are smoothing fit. I did not create this plot for US 
 # Per capita cases (confirmed and deaths) with elapsed number of days from a specified time zero as indicated in the x-axis
 
 ```python
-cvp.per_capita_global_plot(corona)
+cvp.per_capita_global_plot(corona, days_before=dbf)
 ```
 
 On a per capita basis, the US is actually fairing OK compared to some European countries (e.g., Spain and Italy). After the very early infections, growth is linear or sublinear for many countries, as will be shown in the subsequent plots of *growth rates*. Some discussion of exponential growth is discussed below (near the end).
 
 ```python
-cvp.per_capita_US_plot(coronaUS, corona)
+cvp.per_capita_US_plot(coronaUS, corona, days_before=dbf)
 ```
 
 US local per capita data.
@@ -132,13 +134,13 @@ US local per capita data.
 # Per capita growth rates (confirmed and deaths)
 
 ```python
-cvp.rate_global_plot(corona)
+cvp.rate_global_plot(corona, days_before=dbf)
 ```
 
 Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates for many countries have now decreased from their peak but have continued linear growth (i.e., a flat rate). 
 
 ```python
-cvp.rate_US_plot(coronaUS, corona)
+cvp.rate_US_plot(coronaUS, corona, days_before=dbf)
 ```
 
 US local rate data.
@@ -147,7 +149,7 @@ US local rate data.
 # Active cases and case fatality ratio (CFR)
 
 ```python
-cvp.active_CFR_global_plot(corona)
+cvp.active_CFR_global_plot(corona, days_before=dbf)
 ```
 
 Have we peaked? A curve of active cases help us answer this. Active cases can be calculated easily from data from confirmed, deaths, and recovered. Unfortunately, data for recovered cases is still not very good ([see here](https://www.cnn.com/2020/04/04/health/recovery-coronavirus-tracking-data-explainer/index.html)). For that reason, I estimate active cases by presuming that all confirmed cases are resolved (dead or recovered) in an average number of days (I estimated recovery time to be 14 days based on the links I provided above). By the estimated numbers, many countries have peaked (the US peaked in late April). Not surprising (to me), the rate of decline after the peak is much slower than the rate of increase before the peak, and so we will likely have relatively high numbers of active cases for many months, even years.
@@ -156,7 +158,7 @@ Have we peaked? A curve of active cases help us answer this. Active cases can be
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. There is a lot of talk about how we are not doing enough testing and that the confirmed numbers are low. Therefore, more testing would increase the denominator of the ratio and would make the CFR *even lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
 ```python
-cvp.active_CFR_US_plot(coronaUS, corona)
+cvp.active_CFR_US_plot(coronaUS, corona, days_before=dbf)
 ```
 
 US local active cases and CFR. <!--Active cases are only calculated by the estimation formula.-->
