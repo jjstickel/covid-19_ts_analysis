@@ -26,13 +26,13 @@ countries = ["US", "Italy", "Sweden", "Russia", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # now also process US locations
-US_locs = ["Colorado", "Minnesota", "North Carolina", "Arizona"]
+#US_locs = ["Colorado", "Florida", "Texas", "Arizona"]
 #US_locs = ["Colorado", "South Dakota", "Minnesota", "Wisconsin"]
-#US_locs = ["Colorado", "New York", "Georgia", "Massachusetts"]
+US_locs = ["Colorado", "Florida", "New York", "Arizona"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
-dbf = 60
+dbf = 90
 saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"

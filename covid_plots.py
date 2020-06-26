@@ -347,7 +347,8 @@ def rate_US_plot(coronaUS, corona, N=1, savefigs=False, days_before=days_before)
     axis(xmin = -days_before)
     xlabel("days before %s" % dates[-1].date())
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
-    legend(loc="best")
+    #legend(loc="best")
+    legend(loc="upper left")
     title("growth rate of deaths");
     if savefigs:  savefig("rate_US.pdf", bbox_inches="tight")
     return
