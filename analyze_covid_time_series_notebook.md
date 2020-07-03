@@ -21,7 +21,7 @@ Dependencies are:
 Also, `covid19ts` is part of this repository.
 
 Click on this link for a web-based "live" notebook (it may take awhile to load, be patient):
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covide_time_series_notebook.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covid_time_series_notebook.ipynb)
 
 
 ```python
