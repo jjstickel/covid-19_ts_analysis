@@ -5,7 +5,7 @@ analyses of COVID-19 data. Data sources are:
 
 - https://github.com/CSSEGISandData/COVID-19 (COVID-19 data)
 - https://covidtracking.com/ (COVID-19 US data)
-- https://data.worldbank.org/indicator/sp.pop.totl (wolrd population data)
+- https://data.worldbank.org/indicator/sp.pop.totl (world population data)
 - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US population)
 
 The python notebook can be run "live" by clicking on this binder link (it may take awhile to load, be patient):
