@@ -27,12 +27,12 @@ import covid_plots as cvp
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
+countries = ["US", "India", "Spain", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
 #US_locs = ["Colorado", "Florida", "Texas", "Arizona"]
-US_locs = ["Colorado", "California", "Arizona", "Florida", "New York"]
+US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "Texas"]
 #US_locs = ["Colorado", "Florida", "New York", "Arizona"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
@@ -51,7 +51,7 @@ nctry = len(countries)
 nUSloc = len(US_locs)
 
 dates = corona["dates"]
-lastday = dates[-1]  #### need to make this consistent between data sets
+lastday = dates[-1]  
 
 ## not using this data set for the time being -- will be interesting to check
 ## for differences wit the new US data set
@@ -61,7 +61,8 @@ lastday = dates[-1]  #### need to make this consistent between data sets
 
 ## create function to analyze US data from the COVID Tracking Project; collect
 ## that data and analysis in it's own dict
-coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False, sourcepath="../covidtracking/")
+coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False, sourcepath="../covidtracking/",
+                           lmbd=lmbd)
 
 # estimate "active" cases; since data for recovered cases is so unreliable,
 # just this estimate is used
