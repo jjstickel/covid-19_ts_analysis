@@ -12,7 +12,7 @@ analyses of COVID-19 data. Data sources are:
 
 By default, the COVID-19 data is grabbed from web sources directly. See arguments to functions for specifying files in your local path.
 
-To run the entire notebook, click the `Run` button above.
+To run the entire notebook, click `Cell` from the menu above and then `Run All`.
 
 Dependencies are:
 
