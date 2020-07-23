@@ -272,12 +272,14 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
         locd = corona[locs[i]]
         days = locd["days"] 
         plot(days, locd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=locd["name"])
+        #plot(days, locd["positive"]/locd["population"]*100, sbl[i]+clr[i], mfc='none', mew=1.5, label=locd["name"])
         plot(days, locd["cnf_pc_h"], '-'+clr[i])
     maxvals = [np.nanmax(corona[loc]['cnf_pc']) for loc in locs]
     scaled_max = max(maxvals)
     axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % lastday.date())
-    ylabel("confirmed per $10^%i$" % np.log10(mult))
+    #ylabel("confirmed per $10^%i$" % np.log10(mult))
+    ylabel("confirmed [%]")
     #legend(loc='best')
     title("confirmed per capita")
     # per capita deaths
@@ -292,6 +294,7 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
+    ylabel("deaths [%]")
     legend(loc='best')
     title("deaths per capita");
     if savefigs:  savefig("per_capita_US.pdf", bbox_inches="tight")
@@ -346,7 +349,8 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
-    ylabel("active cases per $10^%i$" % np.log10(mult))
+    #ylabel("active cases per $10^%i$" % np.log10(mult))
+    ylabel("active cases [%]")
     #legend(loc='best')
     title("active cases")
     # hospitalizations per capita
@@ -358,7 +362,8 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
-    ylabel("hospitalizations per $10^%i$" % np.log10(mult))
+    #ylabel("hospitalizations per $10^%i$" % np.log10(mult))
+    ylabel("hospitalizations [%]")
     legend(loc='best')
     title("current hospitalizations")
     if savefigs:  savefig("active_hosp_US.pdf", bbox_inches="tight")
@@ -380,7 +385,7 @@ def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_bef
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
-    ylabel("tests, fraction of population")
+    ylabel("tests, % of population")
     #legend(loc='best')
     title("total tests")
     # hospitalizations per capita

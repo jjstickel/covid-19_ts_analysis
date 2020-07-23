@@ -234,12 +234,15 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
             locd[key] = data[key].values
             
         # compute per capita for metrics *I* want to look at (more may be added)
-        locd["cnf_pc"] = locd["positive"]/pop*mult
-        locd["dth_pc"] = locd["death"]/pop*mult
+        #locd["cnf_pc"] = locd["positive"]/pop*mult
+        locd["cnf_pc"] = locd["positive"]/pop*100
+        #locd["dth_pc"] = locd["death"]/pop*mult
+        locd["dth_pc"] = locd["death"]/pop*100
         locd["hsptot_pc"] = locd["hospitalizedCumulative"]/pop*mult
-        locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*mult
+        #locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*mult
+        locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*100
         locd["neg_pc"] = locd["negative"]/pop*mult
-        locd["test_frac"] = locd["totalTestResults"]/pop
+        locd["test_frac"] = locd["totalTestResults"]/pop*100
 
         # CFR - calculate from raw values or smooth values?
         locd["cfr"] = locd["death"]/locd["positive"]
