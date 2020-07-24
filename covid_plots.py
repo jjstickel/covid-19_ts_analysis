@@ -315,7 +315,8 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
              label=locd["name"])
     axis(xmin = -days_before)
     xlabel("days before %s" % lastday.date())
-    ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
+    #ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
+    ylabel("rate of cases [% per day]")
     #legend(loc="best")
     title("growth rate of confirmed cases")
     # rate deaths per capita
@@ -327,7 +328,8 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
-    ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
+    #ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
+    ylabel("rate of deaths [% per day]")
     legend(loc='best')
     title("growth rate of deaths");
     if savefigs:  savefig("rate_US.pdf", bbox_inches="tight")

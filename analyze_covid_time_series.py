@@ -32,7 +32,7 @@ countries = ["US", "India", "Spain", "Sweden", "Brazil"]
 
 # US states, up to 6; US will also be added automatically
 #US_locs = ["Colorado", "Florida", "Texas", "Arizona"]
-US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "Texas"]
+US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "South Carolina"]
 #US_locs = ["Colorado", "Florida", "New York", "Arizona"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
@@ -101,3 +101,11 @@ N+=1
 cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+
+
+# custom analysis
+co = coronaUS_ctp['Colorado']
+poslast = co["positive"][-1] - co["positive"][-2]
+teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]
+percpos = poslast/teslast
+print(percpos)
