@@ -113,7 +113,7 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     ylabel("deaths per $10^%i$" % np.log10(mult))
     legend(loc='best')
     title("deaths per capita");
-    if savefigs:  savefig("per_capita_global.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/per_capita_global.pdf", bbox_inches="tight")
     return
 
 def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
@@ -147,7 +147,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
     legend(loc="best")
     title("growth rate of deaths");
-    if savefigs:  savefig("rate_global.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/rate_global.pdf", bbox_inches="tight")
     return
 
 def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
@@ -184,7 +184,7 @@ def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     ylabel("case-fatality ratio [%]")
     legend(loc="best")
     title("case fatality ratio (CFR)");
-    if savefigs:  savefig("active_CFR_global.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/active_CFR_global.pdf", bbox_inches="tight")
     return
 
 def exp_fit_confirmed_plot(corona, N=1):
@@ -278,8 +278,8 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     scaled_max = max(maxvals)
     axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % lastday.date())
-    #ylabel("confirmed per $10^%i$" % np.log10(mult))
-    ylabel("confirmed [%]")
+    ylabel("confirmed per $10^%i$" % np.log10(mult))
+    #ylabel("confirmed [%]")
     #legend(loc='best')
     title("confirmed per capita")
     # per capita deaths
@@ -294,10 +294,10 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
-    ylabel("deaths [%]")
+    #ylabel("deaths [%]")
     legend(loc='best')
     title("deaths per capita");
-    if savefigs:  savefig("per_capita_US.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/per_capita_US.pdf", bbox_inches="tight")
     return
 
 def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
@@ -315,8 +315,8 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
              label=locd["name"])
     axis(xmin = -days_before)
     xlabel("days before %s" % lastday.date())
-    #ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
-    ylabel("rate of cases [% per day]")
+    ylabel("rate [confirmed per $10^%i$ / day]" % np.log10(mult))
+    #ylabel("rate of increase in cases [% pop. per day]")
     #legend(loc="best")
     title("growth rate of confirmed cases")
     # rate deaths per capita
@@ -328,11 +328,11 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
-    #ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
-    ylabel("rate of deaths [% per day]")
+    ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
+    #ylabel("rate of increase in deaths [% pop. per day]")
     legend(loc='best')
     title("growth rate of deaths");
-    if savefigs:  savefig("rate_US.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/rate_US.pdf", bbox_inches="tight")
     return
 
 
@@ -351,8 +351,8 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
-    #ylabel("active cases per $10^%i$" % np.log10(mult))
-    ylabel("active cases [%]")
+    ylabel("active cases per $10^%i$" % np.log10(mult))
+    #ylabel("active cases [%]")
     #legend(loc='best')
     title("active cases")
     # hospitalizations per capita
@@ -364,11 +364,11 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
-    #ylabel("hospitalizations per $10^%i$" % np.log10(mult))
-    ylabel("hospitalizations [%]")
+    ylabel("hospitalizations per $10^%i$" % np.log10(mult))
+    #ylabel("hospitalizations [%]")
     legend(loc='best')
     title("current hospitalizations")
-    if savefigs:  savefig("active_hosp_US.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/active_hosp_US.pdf", bbox_inches="tight")
     return
 
 
@@ -402,5 +402,5 @@ def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_bef
     ylabel("case fatality ratio [%]")
     legend(loc='best')
     title("case fatality ratio (CFR)")
-    if savefigs:  savefig("tests_CFR_US.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/tests_CFR_US.pdf", bbox_inches="tight")
     return
