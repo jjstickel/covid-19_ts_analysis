@@ -27,7 +27,7 @@ import covid_plots as cvp
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-countries = ["US", "India", "Spain", "Sweden", "Brazil"]
+countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
@@ -38,14 +38,16 @@ US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "South Ca
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 dbf = 100
-saveplots = False
+saveplots = True
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
 lmbd = 5e-5
-corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
+mult = 1e4
+corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd,
+                        mult=mult)
 
-mult = corona["mult"]
+#mult = corona["mult"]
 #critlow = corona["critlow"]
 nctry = len(countries)
 nUSloc = len(US_locs)
@@ -62,7 +64,7 @@ lastday = dates[-1]
 ## create function to analyze US data from the COVID Tracking Project; collect
 ## that data and analysis in it's own dict
 coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False, sourcepath="../covidtracking/",
-                           lmbd=lmbd)
+                           lmbd=lmbd, mult=mult)
 
 # estimate "active" cases; since data for recovered cases is so unreliable,
 # just this estimate is used
@@ -108,4 +110,4 @@ co = coronaUS_ctp['Colorado']
 poslast = co["positive"][-1] - co["positive"][-2]
 teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]
 percpos = poslast/teslast
-print(percpos)
+print("current fraction of positive tests in CO = %g" % percpos)

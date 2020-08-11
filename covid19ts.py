@@ -19,7 +19,8 @@ popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_887275/"
            "API_SP.POP.TOTL_DS2_en_csv_v2_887275_2018.csv")
 
 ##### scaling factor for cases, i.e., "x per mult" ######
-multval=1e6
+#multval=1e6
+multval=1e4
 #critlow = 10*1e-6 # for time zero, using confirmed
 #critlow = 0.1*1e-6 # for time zero, using deaths
 
@@ -234,13 +235,13 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
             locd[key] = data[key].values
             
         # compute per capita for metrics *I* want to look at (more may be added)
-        #locd["cnf_pc"] = locd["positive"]/pop*mult
-        locd["cnf_pc"] = locd["positive"]/pop*100
-        #locd["dth_pc"] = locd["death"]/pop*mult
-        locd["dth_pc"] = locd["death"]/pop*100
+        locd["cnf_pc"] = locd["positive"]/pop*mult
+        #locd["cnf_pc"] = locd["positive"]/pop*100
+        locd["dth_pc"] = locd["death"]/pop*mult
+        #locd["dth_pc"] = locd["death"]/pop*100
         locd["hsptot_pc"] = locd["hospitalizedCumulative"]/pop*mult
-        #locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*mult
-        locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*100
+        locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*mult
+        #locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*100
         locd["neg_pc"] = locd["negative"]/pop*mult
         locd["test_frac"] = locd["totalTestResults"]/pop*100
 
