@@ -23,6 +23,9 @@ import numpy as np
 from covid19ts import covid19_global, covid19_US, covid19_ctp
 import covid_plots as cvp
 
+from matplotlib.pyplot import *
+ion()
+
 ## User input -- put up to 7 countries of interest in this list. Must be the
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
@@ -38,7 +41,7 @@ US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "South Ca
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 dbf = 100
-saveplots = True
+saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
@@ -111,3 +114,20 @@ poslast = co["positive"][-1] - co["positive"][-2]
 teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]
 percpos = poslast/teslast
 print("current fraction of positive tests in CO = %g" % percpos)
+posidaily = np.diff(co["positive"])
+testdaily = np.diff(co["totalTestResults"])
+posfracdaily = posidaily/testdaily                    
+newconfirmed = np.diff(co["positive"])/co["population"]
+
+N+=1
+figure(N)
+clf()
+days = co["days"]
+plot(days[1:], newconfirmed*1e5, "--", lw=1, label="new confirmed")
+plot(days[1:], posfracdaily*100, lw=1, label="new positive test percent")
+plot(days, co["hspcur_pc"]*10, lw=2, label="hopitalizations")
+legend(loc='best')
+axis(xmin=-90,ymax=15)
+xlabel("days before %s" % lastday.date())
+ylabel("percent or per 100,000")
+title("Colorado")
