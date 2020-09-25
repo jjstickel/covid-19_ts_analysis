@@ -150,7 +150,7 @@ US local rate data. Again, while the rate of increased cases are high in many st
 cvp.active_CFR_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred a couple months ago, we are now clearly have a second wave.
+Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred months ago, we are now clearly having more waves.
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. Generally, more testing increases the denominator of the ratio and makes the CFR *lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
@@ -161,7 +161,7 @@ The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is
 cvp.active_hosp_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. While active cases in Arizona and Florida now rivals New York in April, hospitalizations are still less than half (per capita). It looks like the second wave in Arizona has peaked.
+The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. While active cases in Arizona and Florida peaked at levels similar to New York in April, hospitalizations were still less than half (per capita). 
 
 ```python
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, days_before=dbf)
