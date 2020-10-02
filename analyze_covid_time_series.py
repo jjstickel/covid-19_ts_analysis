@@ -41,7 +41,7 @@ US_locs = ["Colorado", "California", "Arizona", "Florida", "New York", "South Da
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 dbf = 100
-saveplots = False
+saveplots = True
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
@@ -131,3 +131,4 @@ axis(xmin=-120,ymax=15)
 xlabel("days before %s" % lastday.date())
 ylabel("percent or per 100,000")
 title("Colorado")
+if saveplots: savefig("plots/testing_hosp_CO.pdf", bbox_inches='tight')
