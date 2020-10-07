@@ -7,7 +7,6 @@ https://github.com/CSSEGISandData/COVID-19)
 """
 
 ## TODO:
-# x actually pass through arguments of `mult` and `critlow` !!!!!!
 # - check and correct for double counting of cities? e.g. New York City
 
 import numpy as np
