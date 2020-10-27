@@ -30,6 +30,7 @@ ion()
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
+#countries = ["US", "Spain", "Sweden", "India", "Japan"]
 countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
@@ -40,7 +41,7 @@ US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South D
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
-dbf = 100
+dbf = 120
 saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
@@ -99,7 +100,8 @@ cvp.active_CFR_global_plot(corona, lastday, N, savefigs=saveplots, days_before=d
 #N+=1
 #cvp.confirmed_deaths_simul_global_plot(corona, N)
 N+=1
-cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf,
+                       tot_d=False)
 N+=1
 cvp.rate_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
