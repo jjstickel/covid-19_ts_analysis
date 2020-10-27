@@ -30,6 +30,9 @@ sbl = ["o", "s", "v", "d", "x", "^", "*"]
 
 days_before = 75 # days before present day to show on many plots
 
+# us yearly deaths
+us_tot_d = 87. # per 10,000, average of 2017-2019
+
 #### global plotting functions #####
 
 def total_global_plot(corona, N=1):
@@ -260,7 +263,8 @@ def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_be
 ##### US plotting functions ####
 k = 0 # color shift so that US location colors are different from global colors
 
-def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before,
+                       tot_d=False):
     # per capita cases
     locs = corona["locs"]
     nloc = len(locs)
@@ -291,7 +295,11 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
         plot(days, locd["dth_pc_h"], '-'+clr[i])
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
-    axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+    if tot_d:
+        plot(days, us_tot_d*np.ones(days.shape), '--k')
+        axis(xmin=-days_before)
+    else:
+        axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
     #ylabel("deaths [%]")

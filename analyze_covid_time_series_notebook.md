@@ -41,7 +41,7 @@ import covid_plots as cvp
 Put up to 7 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
 
 ```python
-countries = ["US", "Italy", "Spain", "Sweden", "Russia", "Brazil"]
+countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
 ```
 
 Put up to 6 US states in the `US_locs` list. 
@@ -92,7 +92,7 @@ for loc in coronaUS_ctp["locs"]:
 
 ```python
 # plot setup
-dbf = 100 # days before today the time axes
+dbf = 120 # days before today the time axes
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
