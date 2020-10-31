@@ -296,7 +296,7 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
     if tot_d:
-        plot(days, us_tot_d*np.ones(days.shape), '--k')
+        plot(days, us_tot_d*np.ones(days.shape), '--k', label="total deaths 2018")
         axis(xmin=-days_before)
     else:
         axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
