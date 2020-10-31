@@ -30,19 +30,18 @@ ion()
 ## same name used in the JH global files, and (at the moment), it must be a
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
-#countries = ["US", "Spain", "Sweden", "India", "Japan"]
-countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
+#countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
+countries = ["US", "Spain", "Germany", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
-#US_locs = ["Colorado", "Florida", "Texas", "Arizona"]
-US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-#US_locs = ["Colorado", "Florida", "New York", "Arizona"]
+#US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
-dbf = 120
-saveplots = False
+dbf = 200
+saveplots = True
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
@@ -129,7 +128,7 @@ plot(days[1:], newconfirmed*1e5, "--", lw=1, label="new confirmed")
 plot(days[1:], posfracdaily*100, lw=1, label="new positive test percent")
 plot(days, co["hspcur_pc"]*10, lw=2, label="hopitalizations")
 legend(loc='best')
-axis(xmin=-120,ymax=15)
+axis(xmin=-dbf,ymax=15)
 xlabel("days before %s" % lastday.date())
 ylabel("percent or per 100,000")
 title("Colorado")
