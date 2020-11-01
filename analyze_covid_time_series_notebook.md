@@ -92,7 +92,7 @@ for loc in coronaUS_ctp["locs"]:
 
 ```python
 # plot setup
-dbf = 120 # days before today the time axes
+dbf = 200 # days before today the time axes
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
