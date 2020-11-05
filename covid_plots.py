@@ -344,7 +344,8 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     return
 
 
-def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before,
+                        capacity=False):
     # active cases per capita
     locs = corona["locs"]
     nloc = len(locs)
@@ -370,6 +371,8 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
         days = locd["days"] 
         plot(days, locd["hspcur_pc"], "-"+sbl[i]+clr[i], lw=2, mfc='none',
              label=locd["name"])
+        if capacity:
+            plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=2)
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
