@@ -41,7 +41,7 @@ US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South 
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 dbf = 200
-saveplots = True
+saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 

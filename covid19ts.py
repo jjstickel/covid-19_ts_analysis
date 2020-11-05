@@ -174,6 +174,10 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
     codetable = pd.read_json("state_codes.json")
     codetable.set_index("State", inplace=True)
 
+    # hospital bed capacities
+    hosp_data = pd.read_csv("Summary_stats_all_locs.csv")
+    hosp_data.set_index("location_name", inplace=True)
+       
     # read US data
     if websource:
         data_us = pd.read_json("https://covidtracking.com/api/v1/us/daily.json")
@@ -216,10 +220,13 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
             pop = pops.loc["United States"]["POPESTIMATE2019"]
             locd["population"] = pop
             data = data_us.iloc[::-1]
+            #capacity = hosp_data["all_bed_capacity"]["United States of America"]
+            capacity = np.nan # no entry for US in the spreadsheat, JJS 11/4/20
         else:
             pop = pops.loc[loc]["POPESTIMATE2019"]
             locd["population"] = pop
             data = data_states[loc].iloc[::-1]
+            capacity = hosp_data["all_bed_capacity"][loc]
         # get and process dates -- US and each state may have different dates
         # convert integer dates to datetime object
         dates = pd.to_datetime(data["date"].apply(int_to_date).values)
@@ -244,6 +251,9 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
         locd["neg_pc"] = locd["negative"]/pop*mult
         locd["test_frac"] = locd["totalTestResults"]/pop*100
 
+        # per capita hospital capacity
+        locd["hsp_cap_pc"] = capacity/pop*mult
+        
         # CFR - calculate from raw values or smooth values?
         locd["cfr"] = locd["death"]/locd["positive"]
         
