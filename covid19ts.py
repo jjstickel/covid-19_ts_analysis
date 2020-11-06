@@ -25,7 +25,7 @@ multval=1e4
 
 
 def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
-                   mult=multval, lmbd=5e-5):
+                   mult=multval, lmbd=5e-5, dbf=None):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the countries
     specified and perform these operations:
@@ -52,10 +52,14 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     for data in [data_confirmed, data_deaths, data_recovered]:
         data["Province/State"] = data["Province/State"].values.astype("str")
 
+    # process `dbf`
+    if dbf is not None:
+        dbf = -dbf
+        
     # presume these files all have the same "fixed" structure -- could put in a
     # check at some point
     header = data_confirmed.columns.values
-    dates = pd.to_datetime(header[4:])
+    dates = pd.to_datetime(header[4:])[dbf:]
 
     # read in population data (source: https://data.worldbank.org/indicator/sp.pop.totl)
     data_pop = pd.read_csv(file_pop, header=4)
@@ -67,9 +71,9 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
         corona[country] = ctryd
         ctryd['name'] = country
         ctryd['population'] = read_pop(data_pop, country)
-        ctryd['cnf'] = read_cases(data_confirmed, country)
-        ctryd['dth'] = read_cases(data_deaths, country)
-        ctryd['rec'] = read_cases(data_recovered, country)
+        ctryd['cnf'] = read_cases(data_confirmed, country)[dbf:]
+        ctryd['dth'] = read_cases(data_deaths, country)[dbf:]
+        ctryd['rec'] = read_cases(data_recovered, country)[dbf:]
 
     corona["mult"] = mult
     #corona["critlow"] = critlow
@@ -80,7 +84,8 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     return corona
 
 
-def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e-5):
+def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e-5,
+               dbf=None):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the US locations
     specified and perform these operations:
@@ -103,11 +108,17 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     pathname = setup_path(websource, JHCSSEpath)
     # read in US data
     data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_US.csv")
+    # note:  data_deaths has an extra population column
     data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_US.csv")
+
+    # process `dbf`
+    if dbf is not None:
+        dbf = -dbf
+
     # presume these files all have a known "fixed" structure -- could put in a
     # check at some point
     header = data_confirmed.columns.values
-    dates = pd.to_datetime(header[11:]) # note:  data_deaths has an extra population column
+    dates = pd.to_datetime(header[11:])[dbf:]
 
     corona = dict()
     corona["locs"] = locations # I'm not sure if I like this approach... JJS 4/15/20
@@ -136,8 +147,8 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
                 raise Exception("%s is not in the data files" % loc)
         # these lines should work even for county location with single line...
         locd["population"] = data_deaths[loc_bool]["Population"].sum()
-        locd["cnf"] = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)
-        locd["dth"] = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)
+        locd["cnf"] = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)[dbf:]
+        locd["dth"] = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)[dbf:]
 
     corona["mult"] = mult
     corona["dates"] = dates
@@ -147,7 +158,8 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     return corona
 
 
-def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5):
+def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
+                dbf=None):
     """
     Read in COVID Tracking Project COVID-19 timeseries data for the US and the states
     specified and perform these operations:
@@ -170,6 +182,10 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
     lmbd:           smoothing parameter
 
     """
+    # process `dbf`
+    if dbf is not None:
+        dbf = -dbf
+
     # read state codes
     codetable = pd.read_json("state_codes.json")
     codetable.set_index("State", inplace=True)
@@ -229,7 +245,7 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
             capacity = hosp_data["all_bed_capacity"][loc]
         # get and process dates -- US and each state may have different dates
         # convert integer dates to datetime object
-        dates = pd.to_datetime(data["date"].apply(int_to_date).values)
+        dates = pd.to_datetime(data["date"].apply(int_to_date).values)[dbf:]
         #dates = data_us["date"].values
         ndays = dates.size
         days = (dates - lastday).astype('timedelta64[D]')
@@ -238,7 +254,7 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
         
         # transfer meaningful data
         for key in keys:
-            locd[key] = data[key].values
+            locd[key] = data[key].values[dbf:]
             
         # compute per capita for metrics *I* want to look at (more may be added)
         locd["cnf_pc"] = locd["positive"]/pop*mult
