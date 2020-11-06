@@ -35,8 +35,8 @@ countries = ["US", "Spain", "Germany", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
-#US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+#US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
@@ -48,7 +48,7 @@ JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 lmbd = 5e-5
 mult = 1e4
 corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd,
-                        mult=mult)
+                        mult=mult, dbf=dbf)
 
 #mult = corona["mult"]
 #critlow = corona["critlow"]
@@ -67,7 +67,7 @@ lastday = dates[-1]
 ## create function to analyze US data from the COVID Tracking Project; collect
 ## that data and analysis in it's own dict
 coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False, sourcepath="../covidtracking/",
-                           lmbd=lmbd, mult=mult)
+                           lmbd=lmbd, mult=mult, dbf=dbf)
 
 # estimate "active" cases; since data for recovered cases is so unreliable,
 # just this estimate is used
@@ -78,12 +78,14 @@ rectime = 14 # days, 1 day = 1 data point
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
+    ctryd["acvest_pc"][:rectime] = np.nan
     ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
 for loc in coronaUS_ctp["locs"]:
     locd = coronaUS_ctp[loc]
     locd["acvest_pc"] = locd["cnf_pc"].copy()
+    locd["acvest_pc"][:rectime] = np.nan
     locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
-
+    
 
 # plotting
 N = 1
@@ -104,7 +106,8 @@ cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before
 N+=1
 cvp.rate_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
-cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf,
+                        capacity=False)
 N+=1
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 
@@ -128,7 +131,7 @@ plot(days[1:], newconfirmed*1e5, "--", lw=1, label="new confirmed")
 plot(days[1:], posfracdaily*100, lw=1, label="new positive test percent")
 plot(days, co["hspcur_pc"]*10, lw=2, label="hopitalizations")
 legend(loc='best')
-axis(xmin=-dbf,ymax=15)
+axis(xmin=-dbf,ymax=30)
 xlabel("days before %s" % lastday.date())
 ylabel("percent or per 100,000")
 title("Colorado")

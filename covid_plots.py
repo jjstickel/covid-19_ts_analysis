@@ -17,7 +17,9 @@ fw = 6
 fh = 4
 clr = ['C%g' % i for i in range(10)]
 sbl = ["o", "s", "v", "d", "x", "^", "*"]
-
+mew = 0.5
+ms = 3
+lw = 1.5
 # def critlow_readable(corona):
 #     # get inverse human readable form for t=0 criterium
 #     critlow = corona["critlow"]
@@ -47,8 +49,8 @@ def total_global_plot(corona, N=1):
     for i in range(nctry):
         ctryd = corona[countries[i]]
         population = ctryd['population']
-        plot(dates, ctryd['cnf'], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        #plot(dates, ctryd['cnf_expfit']*population/mult, '--'+clr[i], lw=1.5)
+        plot(dates, ctryd['cnf'], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=ctryd["name"])
+        #plot(dates, ctryd['cnf_expfit']*population/mult, '--'+clr[i], lw=lw)
         plot(dates, ctryd['cnf_pc_h']*population/mult, '-'+clr[i])
     ax = gca()
     ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%m/%d"))
@@ -64,7 +66,7 @@ def total_global_plot(corona, N=1):
     for i in range(nctry):
         ctryd = corona[countries[i]]
         population = ctryd['population']
-        plot(dates, ctryd['dth'], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
+        plot(dates, ctryd['dth'], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=ctryd["name"])
         plot(dates, ctryd['dth_pc_h']*population/mult, '-'+clr[i])
     ax = gca()
     ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%m/%d"))
@@ -92,9 +94,9 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     subplot(121)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        #plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=1.5)
-        plot(days, ctryd["cnf_pc_h"], '-'+clr[i])
+        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=0.5, ms=3)
+        #plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=lw)
+        plot(days, ctryd["cnf_pc_h"], '-'+clr[i], label=ctryd["name"])
     scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
     #axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     axis(xmin = -days_before)
@@ -106,8 +108,8 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     subplot(122)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        plot(days, ctryd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        plot(days, ctryd["dth_pc_h"], '-'+clr[i])
+        plot(days, ctryd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
+        plot(days, ctryd["dth_pc_h"], '-'+clr[i], label=ctryd["name"])
     scaled_max = max([corona[country]['dth_pc'].max() for country in countries])
     #axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     axis(xmin = -days_before)
@@ -133,7 +135,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
     subplot(121)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        plot(days, ctryd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        plot(days, ctryd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=ctryd["name"])
     axis(xmin = -days_before)
     xlabel("days before %s" % dates[-1].date())
@@ -143,7 +145,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
     subplot(122)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        plot(days, ctryd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        plot(days, ctryd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=ctryd["name"])
     axis(xmin = -days_before, ymax = 1.5e3/mult)
     xlabel("days before %s" % dates[-1].date())
@@ -167,8 +169,8 @@ def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     subplot(121)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        #plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        plot(days, ctryd["acvest_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        #plot(days, ctryd["acv_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=ctryd["name"])
+        plot(days, ctryd["acvest_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=ctryd["name"])
         #plot(days, ctryd["acvest_pc"], "-"+clr[i], lw=2)
     #scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
@@ -181,7 +183,7 @@ def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     for i in range(nctry):
         ctryd = corona[countries[i]]
         plot(days, ctryd["dth_pc_h"]/ctryd["cnf_pc_h"]*100, "-"+sbl[i]+clr[i], mfc='none',
-             mew=1.5, label=ctryd["name"])
+             mew=mew, ms=ms, label=ctryd["name"])
     axis(xmin = -days_before, ymin=0-0.05*15, ymax=15)
     xlabel("days before %s" % dates[-1].date())
     ylabel("case-fatality ratio [%]")
@@ -204,8 +206,8 @@ def exp_fit_confirmed_plot(corona, N=1):
     for i in range(nctry):
         ctryd = corona[countries[i]]
         days = ctryd["days"]
-        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=ctryd["name"])
-        plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=1.5)
+        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=ctryd["name"])
+        plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=lw)
         plot(days, ctryd["cnf_pc_h"], '-'+clr[i])
     scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
     axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
@@ -217,9 +219,9 @@ def exp_fit_confirmed_plot(corona, N=1):
     subplot(122)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        semilogy(ctryd["days"], ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5,
+        semilogy(ctryd["days"], ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
                  label=ctryd["name"])
-        semilogy(ctryd["days"], ctryd["cnf_expfit"], '--'+clr[i], lw=1.5)
+        semilogy(ctryd["days"], ctryd["cnf_expfit"], '--'+clr[i], lw=lw)
         semilogy(ctryd["days"], ctryd["cnf_pc_h"], '-'+clr[i])
     axis(xmin=-5, ymin=1e-3)
 #    xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
@@ -243,9 +245,9 @@ def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_be
     ax2 = ax1.twinx()
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        ax1.plot(days, ctryd["cnf_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        ax1.plot(days, ctryd["cnf_pc"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
                  label=ctryd["name"])
-        ax2.plot(days, ctryd["dth_pc"], ":"+sbl[i]+clr[i], mfc='none', mew=1.5, ms=3)
+        ax2.plot(days, ctryd["dth_pc"], ":"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
     cnf_max = max([corona[country]['cnf_pc'].max() for country in countries])
     dth_max = max([corona[country]['dth_pc'].max() for country in countries])
     ax1.axis(xmin=-days_before, ymin=0-cnf_max*0.1, ymax=cnf_max*1.1)
@@ -275,9 +277,9 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=locd["name"])
-        #plot(days, locd["positive"]/locd["population"]*100, sbl[i]+clr[i], mfc='none', mew=1.5, label=locd["name"])
-        plot(days, locd["cnf_pc_h"], '-'+clr[i])
+        plot(days, locd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
+        #plot(days, locd["positive"]/locd["population"]*100, sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=locd["name"])
+        plot(days, locd["cnf_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['cnf_pc']) for loc in locs]
     scaled_max = max(maxvals)
     axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
@@ -291,8 +293,8 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=1.5, label=locd["name"])
-        plot(days, locd["dth_pc_h"], '-'+clr[i])
+        plot(days, locd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
+        plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
     if tot_d:
@@ -319,7 +321,7 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        plot(days, locd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=locd["name"])
     axis(xmin = -days_before)
     xlabel("days before %s" % lastday.date())
@@ -332,7 +334,7 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=1.5,
+        plot(days, locd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=locd["name"])
     axis(xmin=-days_before, ymax = 1.5e3/mult)
     xlabel("days before %s" % lastday.date())
@@ -356,7 +358,7 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["acvest_pc"], "-"+sbl[i]+clr[i], lw=2, mfc='none',
+        plot(days, locd["acvest_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew, ms=ms,
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
@@ -369,10 +371,10 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["hspcur_pc"], "-"+sbl[i]+clr[i], lw=2, mfc='none',
+        plot(days, locd["hspcur_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew, ms=ms,
              label=locd["name"])
         if capacity:
-            plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=2)
+            plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
@@ -394,7 +396,7 @@ def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_bef
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["test_frac"], "-"+sbl[i]+clr[i], lw=2, mfc='none',
+        plot(days, locd["test_frac"], "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms, mfc='none',
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
@@ -406,7 +408,7 @@ def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_bef
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["cfr"]*100, "-"+sbl[i]+clr[i], lw=2, mfc='none',
+        plot(days, locd["cfr"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms, mfc='none',
              label=locd["name"])
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())

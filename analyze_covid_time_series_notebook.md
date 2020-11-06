@@ -57,9 +57,11 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 - determine rates (i.e., the derivative) for cases
 
 ```python
+# days before today to analyze; more days takes a little more processing time; use `None` to use all data
+dbf = 200 
 # global data
 lmbd = 5e-5 # smoothing parameter, larger means more smooth
-corona = covid19_global(countries, lmbd=lmbd)
+corona = covid19_global(countries, lmbd=lmbd, dbf=dbf)
 # extract common variables for ease-of-use
 mult = corona["mult"]
 nctry = len(countries)
@@ -67,7 +69,7 @@ dates = corona["dates"]
 lastday = dates[-1]
 # US data
 nUSloc = len(US_locs)
-coronaUS_ctp = covid19_ctp(US_locs, lastday, lmbd=lmbd)
+coronaUS_ctp = covid19_ctp(US_locs, lastday, lmbd=lmbd, dbf=dbf)
 ```
 
 *Estimate* "active" cases by presuming all confirmed cases have recovered or died in an aeverage number of days. Estimate of recovery time from:
@@ -81,10 +83,12 @@ rectime = 14 # days, 1 day = 1 data point -- you can change this number to see t
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
+    ctryd["acvest_pc"][:rectime] = np.nan
     ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
 for loc in coronaUS_ctp["locs"]:
     locd = coronaUS_ctp[loc]
     locd["acvest_pc"] = locd["cnf_pc"].copy()
+    locd["acvest_pc"][:rectime] = np.nan
     locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
 ```
 
@@ -92,7 +96,6 @@ for loc in coronaUS_ctp["locs"]:
 
 ```python
 # plot setup
-dbf = 200 # days before today the time axes
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
