@@ -9,6 +9,8 @@ analyses of COVID-19 data. Data sources are:
 - https://covidtracking.com/ (COVID-19 US data)
 - https://data.worldbank.org/indicator/sp.pop.totl (world populations)
 - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US populations)
+- http://www.healthdata.org/ (hospital capacity)
+- https://www.cdc.gov/ (total US deaths)
 
 By default, the COVID-19 data is grabbed from web sources directly. See arguments to functions for specifying files in your local path.
 
@@ -96,6 +98,7 @@ for loc in coronaUS_ctp["locs"]:
 
 ```python
 # plot setup
+#reload(cvp)
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
@@ -111,7 +114,7 @@ cvp.fh = 6
 cvp.per_capita_global_plot(corona, lastday, days_before=dbf)
 ```
 
-The US has a lot more confirmed per-capita cases than many countries now. This could be attributed to more testing at this point. Deaths are still lower than some countires, but rising. See rate plots directly below.
+The US has a lot more confirmed per-capita cases than many countries now. This could be attributed to more testing at this point. Deaths continue to rise at a near linear pace. See rate plots below.
 
 
 ## US
@@ -120,7 +123,7 @@ The US has a lot more confirmed per-capita cases than many countries now. This c
 cvp.per_capita_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US local per capita data. Although cases are rising now in some states, deaths remain low compared to New York.
+US local per capita data. Although confirmed cases are more than NY now, deaths remain lower.
 
 
 # Per capita growth rates (confirmed and deaths)
@@ -132,7 +135,7 @@ US local per capita data. Although cases are rising now in some states, deaths r
 cvp.rate_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates for many countries have now decreased from their peak but have continued linear growth (i.e., a flat rate). 
+Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates have gone up and down over time. A flat rate means linear growth.
 
 
 ## US
@@ -141,7 +144,7 @@ Growth rate is the derivative of the cases (i.e., instantaneous slope for each d
 cvp.rate_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US local rate data. Again, while the rate of increased cases are high in many states, the rate of deaths remain low compared to New York in April.
+US local rate data. Again, while the rate of increased cases are high in many states, the rate of deaths remain lower than New York in April.
 
 
 # Active cases, hospitalizations, tests, and case fatality ratio (CFR)
@@ -164,10 +167,22 @@ The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is
 cvp.active_hosp_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. While active cases in Arizona and Florida peaked at levels similar to New York in April, hospitalizations were still less than half (per capita). 
+The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. While active cases in Arizona and Florida peaked at levels similar to New York in April, hospitalizations were still less than half (per capita). A third wave is happening now, mainly in the midwest. Will this be the last wave as we approach saturation (herd immunity) and vaccines become available? Time will tell.
 
 ```python
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US total tests and CFR. While testing has increased, the slopes are not as high as those of active cases in places like Arizona and Florida, and so increased testing cannot fully explain the increased number of cases.
+US total tests and CFR. Testing is approaching 100% of the population in some states (not accounting for people getting multiple tests). As testing increases, so does the number of positive cases that are identified for people who are less likely to be hospitalized and die. This results in a lower CFR.
+
+```python
+cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+```
+
+How bad is COVID-19 really? Here are two figures to help put it in perspective. Hospitalizations are plotted with hospital capacity (left). There is still more hospital capacity, but COVID-19 patients are displacing those with other injureis and illnesses. 
+
+Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 10% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.1% of the population. While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+
+```python
+
+```
