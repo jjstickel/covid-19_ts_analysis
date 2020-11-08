@@ -110,6 +110,8 @@ cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_befor
                         capacity=False)
 N+=1
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+N+=1
+cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
 # custom analysis

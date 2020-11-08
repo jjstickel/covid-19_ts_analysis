@@ -336,7 +336,8 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
         days = locd["days"] 
         plot(days, locd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=locd["name"])
-    axis(xmin=-days_before, ymax = 1.5e3/mult)
+    #axis(xmin=-days_before, ymax = 1.5e3/mult)
+    axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
     #ylabel("rate of increase in deaths [% pop. per day]")
@@ -382,6 +383,47 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
     legend(loc='best')
     title("current hospitalizations")
     if savefigs:  savefig("plots/active_hosp_US.pdf", bbox_inches="tight")
+    return
+
+
+def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+    locs = corona["locs"]
+    nloc = len(locs)
+    mult = corona["mult"]
+    figure(N, figsize=(2*fw,fh))
+    clf()
+    # hospitalizations per capita with capacity
+    subplot(121)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["hspcur_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew, ms=ms,
+             label=locd["name"])
+        plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
+    axis(xmin=-days_before)
+    xlabel("days before %s" % lastday.date())
+    ylabel("hospitalizations per $10^%i$" % np.log10(mult))
+    #annotate("dashed lines = total capacity", [0.25,0.5], xycoords="axes fraction")
+    #ylabel("hospitalizations [%]")
+    #legend(loc='best')
+    title("current hospitalizations\n(dashed lines = total capacity)")
+    # deaths per capita with total US deaths
+    subplot(122)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
+        plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
+    maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
+    scaled_max = max(maxvals)
+    plot(days, us_tot_d*np.ones(days.shape), '--k', label="total deaths 2018")
+    axis(xmin=-days_before)
+    xlabel("days before %s" % lastday.date())
+    ylabel("deaths per $10^%i$" % np.log10(mult))
+    #ylabel("deaths [%]")
+    legend(loc='best')
+    title("deaths per capita");
+    if savefigs:  savefig("plots/hosp_cap_deaths_US.pdf", bbox_inches="tight")
     return
 
 
