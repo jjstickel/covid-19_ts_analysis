@@ -26,3 +26,5 @@ pop_frac2 = np.array(pop_frac2)
 
 ifr_tot = np.sum(pop_frac2*ifr_frac)
 print("estimated total population IFR = %g" % ifr_tot)
+
+# estimated total population IFR = 0.00725153

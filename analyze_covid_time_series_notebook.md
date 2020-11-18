@@ -181,4 +181,8 @@ cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 
 How bad is COVID-19 really? Here are two figures to help put it in perspective. Hospitalizations are plotted with hospital capacity (left). There is still more hospital capacity, but COVID-19 patients are displacing those with other injureis and illnesses. 
 
-Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 10% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.1% of the population. While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 10% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.1% of the population. Heard immunity, without a vaccine, could result in ~5 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+
+```python
+
+```
