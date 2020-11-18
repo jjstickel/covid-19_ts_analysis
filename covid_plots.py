@@ -34,6 +34,7 @@ days_before = 75 # days before present day to show on many plots
 
 # us yearly deaths
 us_tot_d = 87. # per 10,000, average of 2017-2019
+IFR = 0.00725153*1e4 # average IFR, see covid-ifr.py
 
 #### global plotting functions #####
 
@@ -110,9 +111,11 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
         ctryd = corona[countries[i]]
         plot(days, ctryd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
         plot(days, ctryd["dth_pc_h"], '-'+clr[i], label=ctryd["name"])
-    scaled_max = max([corona[country]['dth_pc'].max() for country in countries])
+#    plot(days, 50*np.ones(days.shape), '--k')#, label="herd immunity?")
+    #scaled_max = max([corona[country]['dth_pc'].max() for country in countries])
     #axis(xmin=-5, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
     axis(xmin = -days_before)
+#    annotate("herd immunity?", (0.5, 0.9), xycoords="axes fraction")
     #xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
     xlabel("days before %s" % dates[-1].date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
@@ -265,8 +268,7 @@ def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_be
 ##### US plotting functions ####
 k = 0 # color shift so that US location colors are different from global colors
 
-def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before,
-                       tot_d=False):
+def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     # per capita cases
     locs = corona["locs"]
     nloc = len(locs)
@@ -297,11 +299,7 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
         plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
-    if tot_d:
-        plot(days, us_tot_d*np.ones(days.shape), '--k', label="total deaths 2018")
-        axis(xmin=-days_before)
-    else:
-        axis(xmin=-days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+    axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
     #ylabel("deaths [%]")
@@ -416,12 +414,17 @@ def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=da
         plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
-    plot(days, us_tot_d*np.ones(days.shape), '--k', label="total deaths 2018")
-    axis(xmin=-days_before)
+    plot(days, us_tot_d*np.ones(days.shape), '--k')#, label="total deaths 2018")
+    annotate("total deaths 2018", (0.5, 0.9), xycoords="axes fraction")
+    #plot(days, 0.75*IFR*np.ones(days.shape), ':k', lw=2)#, label="herd immunity?")
+    fill_between(days, 0.5*IFR*np.ones(days.shape), 1.0*IFR*np.ones(days.shape),
+                 facecolor="black", alpha=0.2)
+    annotate("herd immunity? (no vaccine)", (0.4, 0.6), xycoords="axes fraction")
+    axis(xmin=-days_before, xmax=0)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
     #ylabel("deaths [%]")
-    legend(loc='best')
+    legend(loc='upper left')
     title("deaths per capita");
     if savefigs:  savefig("plots/hosp_cap_deaths_US.pdf", bbox_inches="tight")
     return

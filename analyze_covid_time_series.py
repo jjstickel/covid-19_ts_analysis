@@ -35,8 +35,9 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
-US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-#US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
+#US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "New York", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+#US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
@@ -101,8 +102,7 @@ cvp.active_CFR_global_plot(corona, lastday, N, savefigs=saveplots, days_before=d
 #N+=1
 #cvp.confirmed_deaths_simul_global_plot(corona, N)
 N+=1
-cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf,
-                       tot_d=False)
+cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.rate_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
