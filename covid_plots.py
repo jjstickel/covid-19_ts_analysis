@@ -150,7 +150,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
         ctryd = corona[countries[i]]
         plot(days, ctryd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=ctryd["name"])
-    axis(xmin = -days_before, ymax = 1.5e3/mult)
+    axis(xmin = -days_before)#, ymax = 1.5e3/mult)
     xlabel("days before %s" % dates[-1].date())
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
     legend(loc="best")

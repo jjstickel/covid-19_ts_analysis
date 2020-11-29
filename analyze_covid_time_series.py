@@ -48,6 +48,7 @@ JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
 
 lmbd = 5e-5
 mult = 1e4
+#mult = 1e6
 corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd,
                         mult=mult, dbf=dbf)
 
