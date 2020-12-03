@@ -36,7 +36,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
 
 # US states, up to 6; US will also be added automatically
 #US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-US_locs = ["Colorado", "New York", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "New York", "Arizona", "Florida", "California", "South Dakota"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]

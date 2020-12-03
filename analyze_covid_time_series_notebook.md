@@ -49,7 +49,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
 Put up to 6 US states in the `US_locs` list. 
 
 ```python
-US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "California", "New York", "Florida", "California", "South Dakota"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
@@ -81,7 +81,7 @@ coronaUS_ctp = covid19_ctp(US_locs, lastday, lmbd=lmbd, dbf=dbf)
 Unfortunately, recovered data is really poor, and so directly calculating active cases is not useful.
 
 ```python
-rectime = 14 # days, 1 day = 1 data point -- you can change this number to see the affect on estimated acive cases
+rectime = 14 # days, 1 day = 1 data point -- you can change this number to see the affect on estimated active cases
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
