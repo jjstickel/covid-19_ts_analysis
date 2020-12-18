@@ -49,7 +49,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
 Put up to 6 US states in the `US_locs` list. 
 
 ```python
-US_locs = ["Colorado", "California", "New York", "Florida", "California", "South Dakota"]
+US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
