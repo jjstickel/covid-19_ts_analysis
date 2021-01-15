@@ -64,7 +64,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
 Put up to 6 US states in the `US_locs` list. 
 
 ```python
-US_locs = ["Colorado", "California", "New York", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["Colorado", "California", "New York", "Florida", "Arizona", "South Dakota"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
@@ -120,7 +120,7 @@ cvp.fh = 6
 #cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 ```
 
-# Per capita cases (confirmed and deaths) with elapsed number of days from a specified time zero as indicated in the x-axis
+# Per capita cases (confirmed and deaths)
 
 
 ## Global
@@ -138,7 +138,7 @@ The US has a lot more confirmed per-capita cases than many countries now. This c
 cvp.per_capita_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US local per capita data. Although confirmed cases are more than NY now, deaths remain lower.
+US local per capita data. 
 
 
 # Per capita growth rates (confirmed and deaths)
@@ -159,7 +159,7 @@ Growth rate is the derivative of the cases (i.e., instantaneous slope for each d
 cvp.rate_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US local rate data. Again, while the rate of increased cases are high in many states, the rate of deaths remain lower than New York in April.
+US local rate data. 
 
 
 # Active cases, hospitalizations, tests, and case fatality ratio (CFR)
@@ -182,13 +182,13 @@ The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is
 cvp.active_hosp_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. While active cases in Arizona and Florida peaked at levels similar to New York in April, hospitalizations were still less than half (per capita). A third wave is happening now, mainly in the midwest. Will this be the last wave as we approach saturation (herd immunity) and vaccines become available? Time will tell.
+The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. Waves of hospitalizations follow closely active cases.
 
 ```python
 cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-US total tests and CFR. Testing is approaching 100% of the population in some states (not accounting for people getting multiple tests). As testing increases, so does the number of positive cases that are identified for people who are less likely to be hospitalized and die. This results in a lower CFR.
+US total tests and CFR. Testing has passed 100% of the population in NY (some people are getting multiple tests). As testing increases, so does the number of positive cases that are identified for people who are less likely to be hospitalized and die. This results in a lower CFR.
 
 ```python
 cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, days_before=dbf)
