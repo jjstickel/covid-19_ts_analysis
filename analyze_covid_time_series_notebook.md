@@ -58,7 +58,7 @@ import covid_plots as cvp
 Put up to 7 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
 
 ```python
-countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
+countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
 ```
 
 Put up to 6 US states in the `US_locs` list. 
@@ -194,9 +194,9 @@ US total tests and CFR. Testing has passed 100% of the population in NY (some pe
 cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, days_before=dbf)
 ```
 
-How bad is COVID-19 really? Here are two figures to help put it in perspective. Hospitalizations are plotted with hospital capacity (left). There is still more hospital capacity, but COVID-19 patients are displacing those with other injureis and illnesses. 
+How bad is COVID-19 really? Here are two figures to help put it in perspective. Hospitalizations are plotted with hospital capacity (left). There is still more hospital capacity, but COVID-19 patients are displacing those with other injuries and illnesses. 
 
-Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 10% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.1% of the population. Heard immunity, without a vaccine, could result in ~5 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 20% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.2% of the population. Heard immunity, without a vaccine, could result in ~2-4 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
 
 ```python
 
