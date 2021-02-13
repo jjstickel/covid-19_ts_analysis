@@ -31,7 +31,7 @@ ion()
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 #countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
-countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil"]
+countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
