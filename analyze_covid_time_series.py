@@ -31,7 +31,7 @@ ion()
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 #countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
-countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
+countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
@@ -41,7 +41,7 @@ US_locs = ["Colorado", "New York", "Arizona", "Florida", "California", "South Da
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
-dbf = 200
+dbf = 150
 saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
