@@ -119,7 +119,8 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     #xlabel('days since %i confirmed per $10^%i$' % (clinv_dig, clinv_exp))
     xlabel("days before %s" % dates[-1].date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
-    legend(loc='best')
+    #legend(loc='best')
+    legend(loc='upper left')
     title("deaths per capita");
     if savefigs:  savefig("plots/per_capita_global.pdf", bbox_inches="tight")
     return
