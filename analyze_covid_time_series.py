@@ -4,6 +4,10 @@ https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
 
 """
 
+# TBD: analyze age-based hospitalization data from here:
+# https://gis.cdc.gov/grasp/COVIDNet/COVID19_3.html
+# will likely need age distributions, see covid-ifr.py
+
 # Jonathan Stickel, 2020
 
 # on 3/23/20, J-H switched to a new set of csv files
@@ -31,8 +35,8 @@ ion()
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 #countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
-countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
-#countries = ["US", "Sweden", "Denmark", "Norway"]
+#countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
+countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US states, up to 6; US will also be added automatically
 #US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
@@ -61,15 +65,17 @@ dates = corona["dates"]
 lastday = dates[-1]  
 
 ## not using this data set for the time being -- will be interesting to check
-## for differences wit the new US data set
-#coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd)
-#if not np.alltrue(corona["dates"] == coronaUS["dates"]):
-#    raise ValueError("the dates from the global and US files do not match")
+## for differences with the new US data set
+coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd, mult=mult,
+                      dbf=dbf)
+if not np.alltrue(corona["dates"] == coronaUS["dates"]):
+    raise ValueError("the dates from the global and US files do not match")
 
-## create function to analyze US data from the COVID Tracking Project; collect
-## that data and analysis in it's own dict
-coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False, sourcepath="../covidtracking/",
-                           lmbd=lmbd, mult=mult, dbf=dbf)
+# create function to analyze US data from the COVID Tracking Project; collect
+# that data and analysis in it's own dict
+# OBSOLETE -- COVID Tracking Project stopped collating data March 2021
+#coronaUS_ctp = covid19_ctp(US_locs, lastday, websource=False,
+#                           sourcepath="../covidtracking/", lmbd=lmbd, mult=mult, dbf=dbf)
 
 # estimate "active" cases; since data for recovered cases is so unreliable,
 # just this estimate is used
@@ -82,8 +88,8 @@ for country in countries:
     ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
     ctryd["acvest_pc"][:rectime] = np.nan
     ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
-for loc in coronaUS_ctp["locs"]:
-    locd = coronaUS_ctp[loc]
+for loc in coronaUS["locs"]:
+    locd = coronaUS[loc]
     locd["acvest_pc"] = locd["cnf_pc"].copy()
     locd["acvest_pc"][:rectime] = np.nan
     locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
@@ -103,39 +109,39 @@ cvp.active_CFR_global_plot(corona, lastday, N, savefigs=saveplots, days_before=d
 #N+=1
 #cvp.confirmed_deaths_simul_global_plot(corona, N)
 N+=1
-cvp.per_capita_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.per_capita_US_plot(coronaUS, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
-cvp.rate_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
-N+=1
-cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf,
-                        capacity=False)
-N+=1
-cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
-N+=1
-cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.rate_US_plot(coronaUS, lastday, N, savefigs=saveplots, days_before=dbf)
+# N+=1
+# cvp.active_hosp_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf,
+#                         capacity=False)
+#N+=1
+#cvp.tests_CFR_US_plot(coronaUS, lastday, N, savefigs=saveplots, days_before=dbf)
+# N+=1
+# cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
-# custom analysis
-co = coronaUS_ctp['Colorado']
-poslast = co["positive"][-1] - co["positive"][-2]
-teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]
-percpos = poslast/teslast
-print("current fraction of positive tests in CO = %g" % percpos)
-posidaily = np.diff(co["positive"])
-testdaily = np.diff(co["totalTestResults"])
-posfracdaily = posidaily/testdaily                    
-newconfirmed = np.diff(co["positive"])/co["population"]
+# # custom analysis
+# co = coronaUS_ctp['Colorado']
+# poslast = co["positive"][-1] - co["positive"][-2]
+# teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]
+# percpos = poslast/teslast
+# print("current fraction of positive tests in CO = %g" % percpos)
+# posidaily = np.diff(co["positive"])
+# testdaily = np.diff(co["totalTestResults"])
+# posfracdaily = posidaily/testdaily                    
+# newconfirmed = np.diff(co["positive"])/co["population"]
 
-N+=1
-figure(N)
-clf()
-days = co["days"]
-plot(days[1:], newconfirmed*1e5, "--", lw=1, label="new confirmed")
-plot(days[1:], posfracdaily*100, lw=1, label="new positive test percent")
-plot(days, co["hspcur_pc"]*10, lw=2, label="hopitalizations")
-legend(loc='best')
-axis(xmin=-dbf)#,ymax=30)
-xlabel("days before %s" % lastday.date())
-ylabel("percent or per 100,000")
-title("Colorado")
-if saveplots: savefig("plots/testing_hosp_CO.pdf", bbox_inches='tight')
+# N+=1
+# figure(N)
+# clf()
+# days = co["days"]
+# plot(days[1:], newconfirmed*1e5, "--", lw=1, label="new confirmed")
+# plot(days[1:], posfracdaily*100, lw=1, label="new positive test percent")
+# plot(days, co["hspcur_pc"]*10, lw=2, label="hopitalizations")
+# legend(loc='best')
+# axis(xmin=-dbf)#,ymax=30)
+# xlabel("days before %s" % lastday.date())
+# ylabel("percent or per 100,000")
+# title("Colorado")
+# if saveplots: savefig("plots/testing_hosp_CO.pdf", bbox_inches='tight')

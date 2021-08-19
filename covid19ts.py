@@ -14,6 +14,7 @@ import pandas as pd
 #import regularsmooth as ds # my local copy
 import scikits.datasmooth as ds # pip installed
 
+# FIXME:  update population file
 popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_887275/"
            "API_SP.POP.TOTL_DS2_en_csv_v2_887275_2018.csv")
 
@@ -40,6 +41,7 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     file_pop:       path to the population file (default is provided)
     mult:           scaling factor for the data, default is 1e6
     lmbd:           smoothing parameter
+    dbf:            days before latest record to include in the analysis
     """
     
     # read in Johns Hopkins' data tables
@@ -84,6 +86,7 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     return corona
 
 
+# I guess I'll go back to using this with JH data -- will need to see if it still works
 def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e-5,
                dbf=None):
     """
@@ -102,6 +105,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     JHCSSEpath:     path to the local files if websource=False
     mult:           scaling factor for the data, default is 1e6
     lmbd:           smoothing parameter
+    dbf:            days before latest record to include in the analysis
     """
     
     # read in Johns Hopkins' data tables
@@ -158,6 +162,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     return corona
 
 
+# this is now obsolete because COVID Tracking Project stopped collating data March 2021
 def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
                 dbf=None):
     """

@@ -274,12 +274,13 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
+    days = corona["days"]
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
     for i in range(nloc):
         locd = corona[locs[i]]
-        days = locd["days"] 
+        #days = locd["days"] # when used CTP data?
         plot(days, locd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
         #plot(days, locd["positive"]/locd["population"]*100, sbl[i]+clr[i], mfc='none', mew=mew, ms=ms, label=locd["name"])
         plot(days, locd["cnf_pc_h"], '-'+clr[i], label=locd["name"])
@@ -295,7 +296,7 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     subplot(122)
     for i in range(nloc):
         locd = corona[locs[i]]
-        days = locd["days"] 
+        #days = locd["days"] # when used CTP data?
         plot(days, locd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
         plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
@@ -314,12 +315,13 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
+    days = corona["days"]
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
     for i in range(nloc):
         locd = corona[locs[i]]
-        days = locd["days"] 
+        #days = locd["days"] 
         plot(days, locd["cnf_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=locd["name"])
     axis(xmin = -days_before)
@@ -332,7 +334,7 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     subplot(122)
     for i in range(nloc):
         locd = corona[locs[i]]
-        days = locd["days"] 
+        #days = locd["days"] 
         plot(days, locd["dth_rate"], "-"+sbl[i]+clr[i], mfc='none', mew=mew, ms=ms,
              label=locd["name"])
     #axis(xmin=-days_before, ymax = 1.5e3/mult)
