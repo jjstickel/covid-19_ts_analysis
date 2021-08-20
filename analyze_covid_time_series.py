@@ -4,14 +4,11 @@ https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
 
 """
 
-# TBD: analyze age-based hospitalization data from here:
-# https://gis.cdc.gov/grasp/COVIDNet/COVID19_3.html
-# will likely need age distributions, see covid-ifr.py
-
-# Jonathan Stickel, 2020
+# Jonathan Stickel, 2020, 2021
 
 # on 3/23/20, J-H switched to a new set of csv files
 # on 7/15/20, switched to using Covid Tracking Project for US data
+# after March 2021, Covid Tracking Project stopped updating their data, so no longer using it
 
 # US populations from
 # https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
@@ -21,6 +18,7 @@ https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
 #   sum provides the correct result
 # - (long term) switch from dict to class
 # - check and correct for double counting of cities? e.g. New York City
+
 
 import numpy as np
 
