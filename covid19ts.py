@@ -26,7 +26,7 @@ multval=1e4
 
 
 def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
-                   mult=multval, lmbd=5e-5, dbf=None):
+                   mult=multval, lmbd=5e-5, dbf=None, nsub=1):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the countries
     specified and perform these operations:
@@ -42,6 +42,7 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     mult:           scaling factor for the data, default is 1e6
     lmbd:           smoothing parameter
     dbf:            days before latest record to include in the analysis
+    nsub:           subsampling period
     """
     
     # read in Johns Hopkins' data tables
@@ -54,14 +55,16 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     for data in [data_confirmed, data_deaths, data_recovered]:
         data["Province/State"] = data["Province/State"].values.astype("str")
 
-    # process `dbf`
-    if dbf is not None:
-        dbf = -dbf
+    ## changing `dbf` approach in conjunction with new `nsub` feature, JJS 8/24/21
+    # # process `dbf`
+    # if dbf is not None:
+    #     dbf = -dbf
         
     # presume these files all have the same "fixed" structure -- could put in a
     # check at some point
     header = data_confirmed.columns.values
-    dates = pd.to_datetime(header[4:])[dbf:]
+    dates = pd.to_datetime(header[4:])
+    dates = np.flip(np.flip(dates)[:dbf:nsub])
 
     # read in population data (source: https://data.worldbank.org/indicator/sp.pop.totl)
     data_pop = pd.read_csv(file_pop, header=4)
@@ -73,9 +76,13 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
         corona[country] = ctryd
         ctryd['name'] = country
         ctryd['population'] = read_pop(data_pop, country)
-        ctryd['cnf'] = read_cases(data_confirmed, country)[dbf:]
-        ctryd['dth'] = read_cases(data_deaths, country)[dbf:]
-        ctryd['rec'] = read_cases(data_recovered, country)[dbf:]
+        #ctryd['cnf'] = read_cases(data_confirmed, country)[dbf:]
+        arr = read_cases(data_confirmed, country)
+        ctryd['cnf'] = np.flip(np.flip(arr)[:dbf:nsub])
+        arr = read_cases(data_deaths, country)
+        ctryd['dth'] = np.flip(np.flip(arr)[:dbf:nsub])
+        arr = read_cases(data_recovered, country)
+        ctryd['rec'] = np.flip(np.flip(arr)[:dbf:nsub])
 
     corona["mult"] = mult
     #corona["critlow"] = critlow
@@ -88,7 +95,7 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
 
 # I guess I'll go back to using this with JH data -- will need to see if it still works
 def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e-5,
-               dbf=None):
+               dbf=None, nsub=1):
     """
     Read in Johns Hopkins CSSE COVID-19 timeseries data for the US locations
     specified and perform these operations:
@@ -106,6 +113,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     mult:           scaling factor for the data, default is 1e6
     lmbd:           smoothing parameter
     dbf:            days before latest record to include in the analysis
+    nsub:           subsampling period
     """
     
     # read in Johns Hopkins' data tables
@@ -115,14 +123,11 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     # note:  data_deaths has an extra population column
     data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_US.csv")
 
-    # process `dbf`
-    if dbf is not None:
-        dbf = -dbf
-
-    # presume these files all have a known "fixed" structure -- could put in a
+      # presume these files all have a known "fixed" structure -- could put in a
     # check at some point
     header = data_confirmed.columns.values
-    dates = pd.to_datetime(header[11:])[dbf:]
+    dates = pd.to_datetime(header[11:])
+    dates = np.flip(np.flip(dates)[:dbf:nsub])
 
     corona = dict()
     corona["locs"] = locations # I'm not sure if I like this approach... JJS 4/15/20
@@ -151,8 +156,10 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
                 raise Exception("%s is not in the data files" % loc)
         # these lines should work even for county location with single line...
         locd["population"] = data_deaths[loc_bool]["Population"].sum()
-        locd["cnf"] = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)[dbf:]
-        locd["dth"] = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)[dbf:]
+        arr = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)
+        locd["cnf"] = np.flip(np.flip(arr)[:dbf:nsub])
+        arr = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)
+        locd["dth"] = np.flip(np.flip(arr)[:dbf:nsub])
 
     corona["mult"] = mult
     corona["dates"] = dates

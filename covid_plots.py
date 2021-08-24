@@ -30,7 +30,7 @@ lw = 1.5
 #     corona["clinv_exp"] = clinv_exp
 #     return
 
-days_before = 75 # days before present day to show on many plots
+#days_before = 75 # days before present day to show on many plots
 
 # us yearly deaths
 us_tot_d = 87. # per 10,000, average of 2017-2019
@@ -81,7 +81,7 @@ def total_global_plot(corona, N=1):
     title("deaths");
     return
 
-def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # per capita cases
     countries = corona["locs"]
     nctry = len(countries)
@@ -89,7 +89,10 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     mult = corona["mult"]
     days = corona["days"] #- ctryd["days"][-1]
     #    clinv_dig = corona["clinv_dig"]
-#    clinv_exp = corona["clinv_exp"]
+    #    clinv_exp = corona["clinv_exp"]
+    if days_before is None:
+        days_before = -days[0]
+    print(days_before)
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -125,7 +128,7 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     if savefigs:  savefig("plots/per_capita_global.pdf", bbox_inches="tight")
     return
 
-def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # rate confirmed per capita
     countries = corona["locs"]
     nctry = len(countries)
@@ -134,6 +137,9 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
     days = corona["days"]
 #    clinv_dig = corona["clinv_dig"]
 #    clinv_exp = corona["clinv_exp"]
+    if days_before is None:
+        days_before = -days[0]
+
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -159,7 +165,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_befo
     if savefigs:  savefig("plots/rate_global.pdf", bbox_inches="tight")
     return
 
-def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # active and CFR
     countries = corona["locs"]
     nctry = len(countries)
@@ -168,6 +174,9 @@ def active_CFR_global_plot(corona, lastday, N=1, savefigs=False, days_before=day
     mult = corona["mult"]
 #    clinv_dig = corona["clinv_dig"]
 #    clinv_exp = corona["clinv_exp"]
+    if days_before is None:
+        days_before = -days[0]
+
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -234,7 +243,7 @@ def exp_fit_confirmed_plot(corona, N=1):
     title("per capita confirmed, log scale");
     return
 
-def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_before):
+def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=None):
     # confirmed per-capita cases and deaths on one graph
     countries = corona["locs"]
     nctry = len(countries)
@@ -243,6 +252,9 @@ def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_be
     days = corona["days"]
 #    clinv_dig = corona["clinv_dig"]
 #    clinv_exp = corona["clinv_exp"]
+    if days_before is None:
+        days_before = -days[0]
+
     figure(N, figsize=(fw,fh))
     clf()
     ax1 = subplot(111)
@@ -269,12 +281,15 @@ def confirmed_deaths_simul_global_plot(corona, lastday, N=1, days_before=days_be
 ##### US plotting functions ####
 k = 0 # color shift so that US location colors are different from global colors
 
-def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # per capita cases
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
     days = corona["days"]
+    if days_before is None:
+        days_before = -days[0]
+
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -310,12 +325,15 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_be
     if savefigs:  savefig("plots/per_capita_US.pdf", bbox_inches="tight")
     return
 
-def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # rate confirmed per capita
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
     days = corona["days"]
+    if days_before is None:
+        days_before = -days[0]
+
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -348,7 +366,7 @@ def rate_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
     return
 
 
-def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before,
+def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None,
                         capacity=False):
     # active cases per capita
     locs = corona["locs"]
@@ -362,6 +380,8 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
         days = locd["days"] 
         plot(days, locd["acvest_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew, ms=ms,
              label=locd["name"])
+    if days_before is None:
+        days_before = -days[0]
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
     ylabel("active cases per $10^%i$" % np.log10(mult))
@@ -387,7 +407,7 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_b
     return
 
 
-def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
@@ -401,6 +421,8 @@ def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=da
         plot(days, locd["hspcur_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew, ms=ms,
              label=locd["name"])
         plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
+    if days_before is None:
+        days_before = -days[0]
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
@@ -433,7 +455,7 @@ def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=da
     return
 
 
-def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_before):
+def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # tests fraction
     locs = corona["locs"]
     nloc = len(locs)
@@ -446,6 +468,8 @@ def tests_CFR_US_plot(corona, lastday, N=1, savefigs=False, days_before=days_bef
         days = locd["days"] 
         plot(days, locd["test_frac"], "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms, mfc='none',
              label=locd["name"])
+    if days_before is None:
+        days_before = -days[0]
     axis(xmin=-days_before)
     xlabel("days before %s" % lastday.date())  
     ylabel("tests, % of population")

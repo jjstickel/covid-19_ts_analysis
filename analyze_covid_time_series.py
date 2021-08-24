@@ -18,7 +18,8 @@ https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
 #   sum provides the correct result
 # - (long term) switch from dict to class
 # - check and correct for double counting of cities? e.g. New York City
-
+# - switch to use other databases, especially for state data with
+#   hospitalizations and vaccinations
 
 import numpy as np
 
@@ -43,7 +44,12 @@ US_locs = ["Colorado", "New York", "Arizona", "Florida", "California", "South Da
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
-dbf = 150
+dbf = None
+#dbf = 150
+nsub = 7 # subsample every `nsub` points
+if (nsub > 14):
+    raise Warning("Subsampling of %g is too large for estimating active cases" % nsub)
+
 saveplots = False
 
 JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
@@ -52,7 +58,7 @@ lmbd = 5e-5
 mult = 1e4
 #mult = 1e6
 corona = covid19_global(countries, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd,
-                        mult=mult, dbf=dbf)
+                        mult=mult, dbf=dbf, nsub=nsub)
 
 #mult = corona["mult"]
 #critlow = corona["critlow"]
@@ -65,7 +71,7 @@ lastday = dates[-1]
 ## not using this data set for the time being -- will be interesting to check
 ## for differences with the new US data set
 coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd, mult=mult,
-                      dbf=dbf)
+                      dbf=dbf, nsub=nsub)
 if not np.alltrue(corona["dates"] == coronaUS["dates"]):
     raise ValueError("the dates from the global and US files do not match")
 
@@ -80,17 +86,18 @@ if not np.alltrue(corona["dates"] == coronaUS["dates"]):
 # estimate of recovery time from:
 # - https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
 # - https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
-rectime = 14 # days, 1 day = 1 data point
+rectime = 14 # days, 1 day = 1 original data point
+recsamp = np.int(14/nsub)
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
-    ctryd["acvest_pc"][:rectime] = np.nan
-    ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
+    ctryd["acvest_pc"][:recsamp] = np.nan
+    ctryd["acvest_pc"][recsamp:] = ctryd["acvest_pc"][recsamp:] - ctryd["cnf_pc"][:-recsamp]
 for loc in coronaUS["locs"]:
     locd = coronaUS[loc]
     locd["acvest_pc"] = locd["cnf_pc"].copy()
-    locd["acvest_pc"][:rectime] = np.nan
-    locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
+    locd["acvest_pc"][:recsamp] = np.nan
+    locd["acvest_pc"][recsamp:] = locd["acvest_pc"][recsamp:] - locd["cnf_pc"][:-recsamp]
     
 
 # plotting
