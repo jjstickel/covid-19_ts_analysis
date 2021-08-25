@@ -92,7 +92,7 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=Non
     #    clinv_exp = corona["clinv_exp"]
     if days_before is None:
         days_before = -days[0]
-    print(days_before)
+
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)

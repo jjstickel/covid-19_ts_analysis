@@ -1,6 +1,7 @@
-"""Read in Johns Hopkins CSSE COVID-19 timeseries data (source:
-https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
-(https://covidtracking.com/) and perform some basic analysis
+"""
+Read in COVID-19 timeseries data and perform some basic analysis.  See
+header of `covid19ts.py` or `analyze_covid_time_series_notebook.md` for list of
+data sources
 
 """
 
@@ -10,16 +11,13 @@ https://github.com/CSSEGISandData/COVID-19) and Covid Tracking project
 # on 7/15/20, switched to using Covid Tracking Project for US data
 # after March 2021, Covid Tracking Project stopped updating their data, so no longer using it
 
-# US populations from
-# https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
-
 # TODO:
 # - Process countries with multiple entries. Will need to make sure that the
 #   sum provides the correct result
 # - (long term) switch from dict to class
 # - check and correct for double counting of cities? e.g. New York City
 # - switch to use other databases, especially for state data with
-#   hospitalizations and vaccinations
+#   hospitalizations and vaccinations (see covid-tracking project web page on sources)
 
 import numpy as np
 

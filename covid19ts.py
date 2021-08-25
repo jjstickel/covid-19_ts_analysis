@@ -1,8 +1,10 @@
 """
-Module to collect reading and processing of Johns Hopkins CSSE COVID-19
-timeseries data 
+Module with functions for reading and processing COVID-19 timeseries data 
 
-https://github.com/CSSEGISandData/COVID-19)
+https://github.com/CSSEGISandData/COVID-19
+[US data, TBD]
+https://data.worldbank.org/indicator/sp.pop.totl
+https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 
 """
 
@@ -15,8 +17,8 @@ import pandas as pd
 import scikits.datasmooth as ds # pip installed
 
 # FIXME:  update population file
-popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_887275/"
-           "API_SP.POP.TOTL_DS2_en_csv_v2_887275_2018.csv")
+popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_2763937/"
+           "API_SP.POP.TOTL_DS2_en_csv_v2_2763937.csv")
 
 ##### scaling factor for cases, i.e., "x per mult" ######
 #multval=1e6
@@ -349,7 +351,7 @@ def read_pop(data, country):
     row = data[ data["Country Name"]==country ]
     if row.size == 0:
         raise Exception("%s is not in the population data file" % country)
-    return row.loc[:, "2018"].values[0]
+    return row.loc[:, "2020"].values[0]
 
 # normalization and smoothing
 def per_capita(locd, mult):
