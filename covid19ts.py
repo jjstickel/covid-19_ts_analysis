@@ -2,23 +2,34 @@
 Module with functions for reading and processing COVID-19 timeseries data 
 
 https://github.com/CSSEGISandData/COVID-19
-[US data, TBD]
+https://covidactnow.org
 https://data.worldbank.org/indicator/sp.pop.totl
 https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 
 """
 
+# https://github.com/kjhealy/fips-codes/blob/master/county_fips_master.csv -- county_fips_master.csv
+
 ## TODO:
-# - check and correct for double counting of cities? e.g. New York City
+# - (see list in `analyze_covid_time_series.py`)
+
+# attempting to use https://apidocs.covidactnow.org/
+# my key = d4e3714137fb41eb93d0d17fab7e9387
+# https://api.covidactnow.org/v2/states.json?apiKey=YOUR_KEY_HERE
+# https://api.covidactnow.org/v2/states.json?apiKey=d4e3714137fb41eb93d0d17fab7e9387
 
 import numpy as np
 import pandas as pd
+import json
 #import regularsmooth as ds # my local copy
 import scikits.datasmooth as ds # pip installed
 
 # FIXME:  update population file
 popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_2763937/"
            "API_SP.POP.TOTL_DS2_en_csv_v2_2763937.csv")
+
+# my covid act now api key after registering
+apikey = "d4e3714137fb41eb93d0d17fab7e9387"
 
 ##### scaling factor for cases, i.e., "x per mult" ######
 #multval=1e6
@@ -95,7 +106,6 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     return corona
 
 
-# I guess I'll go back to using this with JH data -- will need to see if it still works
 def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e-5,
                dbf=None, nsub=1):
     """
@@ -171,72 +181,92 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     return corona
 
 
-# this is now obsolete because COVID Tracking Project stopped collating data March 2021
-def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
-                dbf=None):
-    """
-    Read in COVID Tracking Project COVID-19 timeseries data for the US and the states
+# reworking to use covid-act-now datasets
+# Is `lastday` still necessary? I think it was a way to make different data
+# sets coincide if they had different last-day records, so probably, JJS 8/26/21
+def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
+                dbf=None, nsub=1):
+    """Read in Covid Act Now COVID-19 timeseries data for the US and the states
     specified and perform these operations:
     - normalize data to be per capita
     - smooth the data
     - set time-zero for each location and shift elapsed time in days
     - determine rates (i.e., the derivative) 
     
-    `states` argument should be a list of state names in the form of
-    `state`.
-
-    `lastday` arbitrary reference day, but intended to be the last day of collected data
+    `locations` argument should be a list of location names in the form of
+    `state` OR `county, state`. [county locations still TBD 8/26/21]
+ 
+    `lastday` is arbitrary reference day, but intended to be the last day of collected data
     
     Optional arguments:
     websource:      whether to get time-series data from the web or local files
-    path:           path to the local files if websource=False; filenames
-                    expected to be in the form `daily_[cd].json` where `cd` is
-                    the two letter code for the state or `us`.
+    path:           path to the local files if websource=False; filenames are
+                    expected to be in the form `[CD].timeseries.json`, where
+                    `CD` is one of `US`, the two letter code for the state, or
+                    FIPS county code.
     mult:           scaling factor for the data, default is 1e6
     lmbd:           smoothing parameter
+    nsub:           subsampling period
 
     """
-    # process `dbf`
-    if dbf is not None:
-        dbf = -dbf
-
     # read state codes
     codetable = pd.read_json("state_codes.json")
     codetable.set_index("State", inplace=True)
 
-    # hospital bed capacities
-    hosp_data = pd.read_csv("Summary_stats_all_locs.csv")
-    hosp_data.set_index("location_name", inplace=True)
-       
+    # # hospital bed capacities -- should be in location-specific files now, or
+    # # at least icu-beds seem to be, 8/26/21
+    # hosp_data = pd.read_csv("Summary_stats_all_locs.csv")
+    # hosp_data.set_index("location_name", inplace=True)
+
+    ## TODO:  if websource = False, look for an up-to-date file; if not, dowload the files
+    
     # read US data
+    ### FIXME, just add `US` to the codes and read it in the other for loop! JJS 8/26/21
     if websource:
-        data_us = pd.read_json("https://covidtracking.com/api/v1/us/daily.json")
+        data_us = pd.read_json("https://covidtracking.com/api/v1/us/daily.json") # FIXME
     else:
-        data_us = pd.read_json(sourcepath + "daily_us.json")
+        filepath = sourcepath + "US.timeseries.json"
+        data_us = json.load(open(filepath))
     # read state data
-    nst = len(states)
-    codes = codetable.loc[states]["Code"].values
-    data_states = dict()
+    nst = len(locations)
+    ### FIXME, extract state part of location, and use FIPS codes for counties
+    codes = codetable.loc[locations]["Code"].values
+    data_locs = dict()
     #for code in codes:
+    ##### TODO:  enable county files ####
     for i in range(nst):
         if websource:
             path = ("https://covidtracking.com/api/v1/states/" + codes[i].lower()
-                    + "/daily.json")
-            data_states[states[i]] = pd.read_json(path)
+                    + "/daily.json") # FIXME
+            data_locs[locations[i]] = pd.read_json(path)
         else:
-            data_states[states[i]] = pd.read_json(sourcepath + "daily_" + codes[i].lower()
-                                                  + ".json")
-    # read in population data
-    pops = pd.read_csv("nst-est2019-alldata.csv")
-    pops.set_index("NAME", inplace=True)
+            filepath = sourcepath + codes[i] + ".timeseries.json"
+            data_locs[locations[i]] = json.load(open(filepath))
+
+    # # read in population data -- should be in location-specific files now, 8/26/21
+    # pops = pd.read_csv("nst-est2019-alldata.csv")
+    # pops.set_index("NAME", inplace=True)
     
-    # set of relevant keys 
-    #keys = ["death", "deathConfirmed", "deathProbable", "hospitalizedCumulative", "hospitalizedCurrently", "inIcuCumulative", "inIcuCurrently", "negative", "negativeTestsViral", "onVentilatorCumulative", "onVentilatorCurrently", "pending", "positive", "positiveCasesViral", "positiveTestsViral", "recovered", "totalTestResults", "totalTestsViral"]
-    keys = ["death", "hospitalizedCumulative", "hospitalizedCurrently", "negative", "positive", "recovered", "totalTestResults"]
+    # set of relevant keys, from the set in "actualsTimeseries"
+    # ['cases', 'deaths', 'positiveTests', 'negativeTests',
+    #    'contactTracers', 'hospitalBeds', 'icuBeds', 'newCases',
+    #    'newDeaths', 'vaccinesAdministeredDemographics',
+    #    'vaccinationsInitiatedDemographics', 'date', 'vaccinesDistributed',
+    #    'vaccinationsInitiated', 'vaccinationsCompleted',
+    #    'vaccinesAdministered']
+    # note that `hospitalBeds` and `icuBeds` expand further into
+    # ['capacity', 'currentUsageTotal', 'currentUsageCovid','typicalUsageRate']
+    ## ignoring `hospitalBeds` for now since there seems to be no capacity data
+    ## (will see if any states/counties have this data), so those columns apply to ICU only
+    keys = ['cases', 'deaths', 'positiveTests', 'negativeTests',
+            'hospCapacity', 'hospTotal', 'hospCovid', 'hospTypical',
+            'icuCapacity', 'icuTotal', 'icuCovid', 'icuTypical',
+            'vaccinesDistributed', 'vaccinationsInitiated', 'vaccinationsCompleted',
+            'vaccinesAdministered']
 
     # initiate combined data dictionary
     corona = dict()
-    locs = ["US"] + states
+    locs = ["US"] + locations
     corona["locs"] = locs
     corona["lastday"] = lastday
     corona["mult"] = mult
@@ -245,22 +275,48 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
     for loc in locs:
         locd = dict()
         locd["name"] = loc
-        # get population
-        if loc=="US":
-            pop = pops.loc["United States"]["POPESTIMATE2019"]
-            locd["population"] = pop
-            data = data_us.iloc[::-1]
-            #capacity = hosp_data["all_bed_capacity"]["United States of America"]
-            capacity = np.nan # no entry for US in the spreadsheat, JJS 11/4/20
+        if loc=="US": ## see FIXME above to include US data into the main dict
+            #data = data_us.iloc[::-1] # not sure about this line...
+            data = data_us
         else:
-            pop = pops.loc[loc]["POPESTIMATE2019"]
-            locd["population"] = pop
-            data = data_states[loc].iloc[::-1]
-            capacity = hosp_data["all_bed_capacity"][loc]
-        # get and process dates -- US and each state may have different dates
-        # convert integer dates to datetime object
-        dates = pd.to_datetime(data["date"].apply(int_to_date).values)[dbf:]
-        #dates = data_us["date"].values
+            data = data_locs[loc]
+
+        # get the datafram of the timeseries data
+        data_df = pd.DataFrame(data["actualsTimeseries"])
+        # remove the time-series objects from data (not entirely necessary, but
+        # will save some ram and maybe some computational cost)
+        #for key in ["actualsTimeseries", "metricsTimeseries", "riskLevelsTimeseries"]:
+        #    data.pop(key)
+        # expand hospital and icu columns
+        hosp_df = pd.DataFrame(data_df["hospitalBeds"].values.tolist())
+        hosp_df.rename(columns={"capacity": "hospCapacity",
+                               "currentUsageTotal": "hospTotal",
+                               "currentUsageCovid": "hospCovid",
+                                "typicalUsageRate": "hospTypical"}, inplace=True)
+        icu_df = pd.DataFrame(data_df["icuBeds"].values.tolist())
+        icu_df.rename(columns={"capacity": "icuCapacity",
+                               "currentUsageTotal": "icuTotal",
+                               "currentUsageCovid": "icuCovid",
+                               "typicalUsageRate": "icuTypical"}, inplace=True)
+        # remove hospital and icu bed columns that are actually elements of dictionaries
+        data_df = data_df.drop(columns=["hospitalBeds", "icuBeds"])
+        # add back icu bed columns
+        data_df = pd.concat([data_df, hosp_df, icu_df], axis=1)
+        #print(data_df.shape)
+        #print(data_df.columns.values) # test that concat worked properly
+
+        # get population
+        pop = data["population"]
+        locd["population"] = pop
+        
+        # hospital capacity seems to be intended but missing from the data
+        # files -- however, icu beds are there, so will use that, JJS 8/26/21
+        # capacity = hosp_data["all_bed_capacity"][loc] 
+        
+        # get and process dates -- US and each sub-location may have different dates
+        #dates = pd.to_datetime(data["date"].apply(int_to_date).values)[dbf:] # for c-t-p
+        dates = pd.to_datetime(data_df["date"].values)
+        dates = np.flip(np.flip(dates)[:dbf:nsub])
         ndays = dates.size
         days = (dates - lastday).astype('timedelta64[D]')
         locd["dates"] = dates
@@ -268,26 +324,31 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
         
         # transfer meaningful data
         for key in keys:
-            locd[key] = data[key].values[dbf:]
+            arr = data_df[key].values
+            locd[key] = np.flip(np.flip(arr)[:dbf:nsub])
             
         # compute per capita for metrics *I* want to look at (more may be added)
-        locd["cnf_pc"] = locd["positive"]/pop*mult
-        #locd["cnf_pc"] = locd["positive"]/pop*100
-        locd["dth_pc"] = locd["death"]/pop*mult
-        #locd["dth_pc"] = locd["death"]/pop*100
-        locd["hsptot_pc"] = locd["hospitalizedCumulative"]/pop*mult
-        locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*mult
-        #locd["hspcur_pc"] = locd["hospitalizedCurrently"]/pop*100
-        locd["neg_pc"] = locd["negative"]/pop*mult
-        locd["test_frac"] = locd["totalTestResults"]/pop*100
-
-        # per capita hospital capacity
-        locd["hsp_cap_pc"] = capacity/pop*mult
+        locd["cnf_pc"] = locd["cases"]/pop*mult
+        locd["dth_pc"] = locd["deaths"]/pop*mult
+        # hospital bed capacity doesn't seem to be populated in the data, so
+        # only getting per-capita hospital usage, JJS 8/27/21
+        locd["hosp_total_pc"] = locd["hospTotal"]/pop*mult
+        locd["hosp_covid_pc"] = locd["hospCovid"]/pop*mult
+        locd["icu_capacity"] = locd["icuCapacity"]
+        locd["icu_total_pc"] = locd["icuTotal"]/pop*mult
+        locd["icu_total_frac"] = locd["icuTotal"]/locd["icu_capacity"]
+        locd["icu_covid_pc"] = locd["icuCovid"]/pop*mult
+        locd["icu_covid_frac"] = locd["icuCovid"]/locd["icu_capacity"]
+        locd["pos_pc"] = locd["positiveTests"]/pop*mult
+        locd["neg_pc"] = locd["negativeTests"]/pop*mult
+        locd["test_frac"] = (locd["positiveTests"] + locd["negativeTests"])/pop
         
-        # CFR - calculate from raw values or smooth values?
-        locd["cfr"] = locd["death"]/locd["positive"]
+        # CFR - calculate from smooth values instead?
+        locd["cfr"] = locd["deaths"]/locd["cases"]
         
-        # smoothing, with constraints, TBD
+        # smoothing, with constraints
+        # TODO: rework `perform_operations` to use it with this data also? JJS
+        # 8/27/21
         # constrain cases to be non-negative
         Aones = -np.eye(ndays)
         bzero = np.zeros((ndays,1))
@@ -296,16 +357,20 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
         bdzero = np.zeros((ndays-1,1))
         Aiq = np.vstack((Aones,D))
         biq = np.vstack((bzero, bdzero))
-        # filter for nan -- alternatve, remove nan's from `days` and `y` vectors?
+        # filter for nan 
         cnf_pc = locd["cnf_pc"].copy()
-        cnf_pc[np.isnan(cnf_pc)] = 0
+        keep = ~np.isnan(cnf_pc)
+        cnf_pc = cnf_pc[keep]
+        dayscnf = days[keep]
         dth_pc = locd["dth_pc"].copy()
-        dth_pc[np.isnan(dth_pc)] = 0
+        keep = ~np.isnan(dth_pc)
+        dth_pc = dth_pc[keep]
+        daysdth = days[keep]
         
-        locd['cnf_pc_h'] = ds.smooth_data_constr(days, cnf_pc, 2, lmbd,
-                                                 (Aiq,biq))
-        locd['dth_pc_h'] = ds.smooth_data_constr(days, dth_pc, 2, lmbd,
-                                                 (Aiq,biq))
+        locd['cnf_pc_h'] = ds.smooth_data_constr(dayscnf, cnf_pc, 2, lmbd,
+                                                 (Aiq,biq), xhat=days)
+        locd['dth_pc_h'] = ds.smooth_data_constr(daysdth, dth_pc, 2, lmbd,
+                                                 (Aiq,biq), xhat=days)
 
         # determine rates, i.e., take the derivative
         locd['cnf_rate'] = deriv1_fd(locd['cnf_pc_h'], days, central=True)
@@ -315,6 +380,7 @@ def covid19_ctp(states, lastday, websource=True, sourcepath=None, mult=multval, 
     return corona
 
 
+# this was needed for covid-tracking-project and is no longer used, JJS 8/27/21
 def int_to_date(dateint):
     """ convert integer of the form yyyymmdd to date object """
     datestr = str(dateint)
