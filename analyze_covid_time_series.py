@@ -37,9 +37,9 @@ ion()
 #countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 countries = ["US", "Sweden", "Denmark", "Norway"]
 
-# US states, up to 6; US will also be added automatically
-#US_locs = ["Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-US_locs = ["Colorado", "New York", "Arizona", "Florida", "California", "South Dakota"]
+# US locations (`US`, States, and counties [TBD]), up to 7
+#US_locs = ["US", "Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
+US_locs = ["US", "Colorado", "New York", "Arizona", "Florida", "California", "South Dakota"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]

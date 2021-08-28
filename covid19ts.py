@@ -12,6 +12,7 @@ https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.htm
 
 ## TODO:
 # - (see list in `analyze_covid_time_series.py`)
+# - code cleanup! delete commented code that is not needed, JJS 8/27/21
 
 # attempting to use https://apidocs.covidactnow.org/
 # my key = d4e3714137fb41eb93d0d17fab7e9387
@@ -21,6 +22,7 @@ https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.htm
 import numpy as np
 import pandas as pd
 import json
+import wget
 #import regularsmooth as ds # my local copy
 import scikits.datasmooth as ds # pip installed
 
@@ -186,7 +188,7 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
 # sets coincide if they had different last-day records, so probably, JJS 8/26/21
 def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
                 dbf=None, nsub=1):
-    """Read in Covid Act Now COVID-19 timeseries data for the US and the states
+    """Read in Covid Act Now COVID-19 timeseries data for the US locations
     specified and perform these operations:
     - normalize data to be per capita
     - smooth the data
@@ -194,7 +196,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     - determine rates (i.e., the derivative) 
     
     `locations` argument should be a list of location names in the form of
-    `state` OR `county, state`. [county locations still TBD 8/26/21]
+    `US`, `state`, OR `county, state`. [county locations still TBD 8/26/21]
  
     `lastday` is arbitrary reference day, but intended to be the last day of collected data
     
@@ -209,7 +211,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     nsub:           subsampling period
 
     """
-    # read state codes
+    # to read state codes
     codetable = pd.read_json("state_codes.json")
     codetable.set_index("State", inplace=True)
 
@@ -220,21 +222,22 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
 
     ## TODO:  if websource = False, look for an up-to-date file; if not, dowload the files
     
-    # read US data
-    ### FIXME, just add `US` to the codes and read it in the other for loop! JJS 8/26/21
-    if websource:
-        data_us = pd.read_json("https://covidtracking.com/api/v1/us/daily.json") # FIXME
-    else:
-        filepath = sourcepath + "US.timeseries.json"
-        data_us = json.load(open(filepath))
     # read state data
-    nst = len(locations)
-    ### FIXME, extract state part of location, and use FIPS codes for counties
-    codes = codetable.loc[locations]["Code"].values
+    nlocs = len(locations)
+    ### FIXME, extract state part of location, and use FIPS codes for counties,
+    ### from `county_fips_maser.csv`
+    # codes = codetable.loc[locations]["Code"].values # for an array, no loop
+    codes = []
+    for loc in locations:
+        if loc == "US":
+            codes.append("US")
+        else:
+            codes.append( codetable.loc[loc]["Code"] )
+
     data_locs = dict()
     #for code in codes:
     ##### TODO:  enable county files ####
-    for i in range(nst):
+    for i in range(nlocs):
         if websource:
             path = ("https://covidtracking.com/api/v1/states/" + codes[i].lower()
                     + "/daily.json") # FIXME
@@ -266,20 +269,15 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
 
     # initiate combined data dictionary
     corona = dict()
-    locs = ["US"] + locations
-    corona["locs"] = locs
+    corona["locs"] = locations
     corona["lastday"] = lastday
     corona["mult"] = mult
 
     # process data
-    for loc in locs:
+    for loc in locations:
         locd = dict()
         locd["name"] = loc
-        if loc=="US": ## see FIXME above to include US data into the main dict
-            #data = data_us.iloc[::-1] # not sure about this line...
-            data = data_us
-        else:
-            data = data_locs[loc]
+        data = data_locs[loc]
 
         # get the datafram of the timeseries data
         data_df = pd.DataFrame(data["actualsTimeseries"])
