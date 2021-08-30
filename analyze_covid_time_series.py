@@ -15,9 +15,9 @@ data sources
 # - Process countries with multiple entries. Will need to make sure that the
 #   sum provides the correct result
 # - Enable analysis for US counties
-# - (long term) switch from dict to class
 # - analyze fraction vaccinated
-# - update hospitalization plots with icu data -- also fraction icu beds used (separate plot)
+# - switch to top-bottom plotting for most plots?
+# - (long term) switch from dict to class
 
 import numpy as np
 
@@ -32,8 +32,8 @@ ion()
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 #countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
-#countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
-countries = ["US", "Sweden", "Denmark", "Norway"]
+countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
+#countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US locations (`US`, States, and counties [TBD]), up to 7
 #US_locs = ["US", "Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
@@ -43,8 +43,8 @@ US_locs = ["US", "Colorado", "New York", "Arizona", "Florida", "California", "So
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 #dbf = None
-dbf = 500
-nsub = 7 # subsample every `nsub` points
+dbf = 200
+nsub = 2 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 
@@ -119,8 +119,10 @@ N+=1
 cvp.rate_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.active_hosp_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
-
 N+=1
+cvp.hosp_icu_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+N+=1
+cvp.vacc_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
 #N+=1

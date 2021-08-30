@@ -409,16 +409,78 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
     #ylabel("hospitalizations [%]")
     legend(loc='best')
-    title("current hospitalizations")
+    title("current COVID-19 hospitalizations")
     if savefigs:  savefig("plots/active_hosp_US.pdf", bbox_inches="tight")
     return
 
 
+### this is a bit messy; do a 2x2 subplot? JJS 8/30/21
+def hosp_icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
+    # COVID-19 hospitalizations and ICU per capita
+    locs = corona["locs"]
+    nloc = len(locs)
+    mult = corona["mult"]
+    figure(N, figsize=(2*fw,fh))
+    clf()
+    subplot(121)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["hosp_covid_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
+             ms=ms, label=locd["name"])
+#        plot(days, locd["icu_covid_pc"], "--"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
+#             ms=ms)
+    if days_before is not None:
+        days_before = -days_before
+    axis(xmin=days_before)
+    xlabel("days before %s" % lastday.date())  
+    ylabel("hospital and icu beds per $10^%i$" % np.log10(mult))
+    legend(loc='best')
+    title("Current COVID-19 hospitalizations")
+    # ICU bed usage, percent of total
+    subplot(122)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["icu_covid_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
+             ms=ms, label=locd["name"])
+        plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
+             mew=mew, ms=ms)
+    axis(xmin=days_before, ymin=0, ymax=100)
+    xlabel("days before %s" % lastday.date())
+    ylabel("ICU bed usage (%)")
+    annotate("Total ICU", (0.5, 0.85), xycoords="axes fraction", ha='center')
+    annotate("COVID-19 ICU", (0.5, 0.25), xycoords="axes fraction", ha='center')
+    #legend(loc='best')
+    title("ICU bed usage")
+    if savefigs:  savefig("plots/hosp_icu_US.pdf", bbox_inches="tight")
+    return
 
 
-
-
-
+# vaccinations; plot against deaths/hosp/icu?
+def vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
+    # tests fraction
+    locs = corona["locs"]
+    nloc = len(locs)
+    mult = corona["mult"]
+    figure(N)#, figsize=(2*fw,fh))
+    clf()
+#    subplot(121)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+#        plot(days, locd["vacc_init_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
+#             mfc='none')
+        plot(days, locd["vacc_full_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
+             mfc='none', label=locd["name"])
+    if days_before is not None:
+        days_before = -days_before
+    #axis(xmin=days_before, ymin=0, ymax=100)
+    axis(xmin=days_before)
+    xlabel("days before %s" % lastday.date())
+    ylabel("vaccinations, % of population")
+    legend(loc='best')
+    title("Completed vaccinations")
 
 
 

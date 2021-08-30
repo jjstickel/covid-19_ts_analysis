@@ -357,6 +357,8 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         locd["pos_pc"] = locd["positiveTests"]/pop*mult
         locd["neg_pc"] = locd["negativeTests"]/pop*mult
         locd["test_frac"] = (locd["positiveTests"] + locd["negativeTests"])/pop
+        locd["vacc_init_frac"] = locd["vaccinationsInitiated"]/pop
+        locd["vacc_full_frac"] = locd["vaccinationsCompleted"]/pop
         
         # CFR - calculate from smooth values instead?
         locd["cfr"] = locd["deaths"]/locd["cases"]
