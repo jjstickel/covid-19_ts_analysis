@@ -291,7 +291,6 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
         days = corona["days"]
     if days_before is not None:
         days_before = -days_before
-
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
@@ -304,7 +303,8 @@ def per_capita_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
         plot(days, locd["cnf_pc_h"], '-'+clr[i], label=locd["name"])
     maxvals = [np.nanmax(corona[loc]['cnf_pc']) for loc in locs]
     scaled_max = max(maxvals)
-    axis(xmin=days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+    #axis(xmin=days_before, ymin=0-scaled_max*0.1, ymax=scaled_max*1.1)
+    axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("confirmed per $10^%i$" % np.log10(mult))
     #ylabel("confirmed [%]")
@@ -458,14 +458,31 @@ def hosp_icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
 
 
 # vaccinations; plot against deaths/hosp/icu?
-def vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
+def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # tests fraction
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
-    figure(N)#, figsize=(2*fw,fh))
+    figure(N, figsize=(2*fw,fh))
     clf()
-#    subplot(121)
+    subplot(121)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["icu_covid_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
+             ms=ms, label=locd["name"])
+        plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
+             mew=mew, ms=ms)
+    if days_before is not None:
+        days_before = -days_before
+    axis(xmin=days_before, ymin=0, ymax=100)
+    xlabel("days before %s" % lastday.date())
+    ylabel("ICU bed usage (%)")
+    annotate("Total ICU", (0.5, 0.85), xycoords="axes fraction", ha='center')
+    annotate("COVID-19 ICU", (0.5, 0.25), xycoords="axes fraction", ha='center')
+    #legend(loc='best')
+    title("ICU bed usage")
+    subplot(122)
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
@@ -473,15 +490,46 @@ def vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
 #             mfc='none')
         plot(days, locd["vacc_full_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
              mfc='none', label=locd["name"])
-    if days_before is not None:
-        days_before = -days_before
     #axis(xmin=days_before, ymin=0, ymax=100)
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("vaccinations, % of population")
     legend(loc='best')
     title("Completed vaccinations")
+    if savefigs:  savefig("plots/icu_vacc_US.pdf", bbox_inches="tight")
+    return
 
+
+def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
+    if days_before is not None:
+        days_before = -days_before
+    locs = corona["locs"]
+    nloc = len(locs)
+    mult = corona["mult"]
+    figure(N, figsize=(fw,fh))
+    clf()
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["dth_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
+        plot(days, locd["dth_pc_h"], '-'+clr[i], label=locd["name"])
+    maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
+    scaled_max = max(maxvals)
+    plot(days, us_tot_d*np.ones(days.shape), '--k')#, label="total deaths 2018")
+    annotate("total deaths 2018", (0.5, 0.9), xycoords="axes fraction")
+    #plot(days, 0.75*IFR*np.ones(days.shape), ':k', lw=2)#, label="herd immunity?")
+    fill_between(days, 0.5*IFR*np.ones(days.shape), 1.0*IFR*np.ones(days.shape),
+                 facecolor="black", alpha=0.2)
+    annotate("Full endemic penetration?\n (no vaccine)", (0.6, 0.6),
+             xycoords="axes fraction", ha="center")
+    axis(xmin=days_before, xmax=0)
+    xlabel("days before %s" % lastday.date())
+    ylabel("deaths per $10^%i$" % np.log10(mult))
+    #ylabel("deaths [%]")
+    legend(loc='upper left')
+    title("deaths per capita");
+    if savefigs:  savefig("plots/deaths_perspective_US.pdf", bbox_inches="tight")
+    return
 
 
 #### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####

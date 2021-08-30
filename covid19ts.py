@@ -8,6 +8,11 @@ https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.htm
 
 """
 
+# old usage data sets
+# - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US populations)
+# - http://www.healthdata.org/ (hospital capacity)
+
+# to be used:
 # https://github.com/kjhealy/fips-codes/blob/master/county_fips_master.csv -- county_fips_master.csv
 
 ## TODO:
@@ -58,12 +63,12 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     webbase = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
     for dataname in ["confirmed", "deaths", "recovered"]:
         filename = "time_series_covid19_" + dataname + "_global.csv"
-        filepath = JHCSSEpath + filename
         webpath = webbase + filename
         if websource:
             print("Using web data file %s" % webpath)
             data[dataname] = pd.read_csv(webpath)
         else:
+            filepath = JHCSSEpath + filename
             try:
                 mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
                 today = datetime.date.today()
@@ -138,12 +143,12 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     webbase = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
     for dataname in ["confirmed", "deaths"]:
         filename = "time_series_covid19_" + dataname + "_US.csv"
-        filepath = JHCSSEpath + filename
         webpath = webbase + filename
         if websource:
             print("Using web data file %s" % webpath)
             data[dataname] = pd.read_csv(webpath)
         else:
+            filepath = JHCSSEpath + filename
             try:
                 mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
                 today = datetime.date.today()
@@ -248,7 +253,6 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     data_locs = dict()
     ##### TODO:  enable county files ####
     for i in range(nlocs):
-        filepath = sourcepath + codes[i] + ".timeseries.json"
         if codes[i]=="US":
             webbase = "https://api.covidactnow.org/v2/country/"
         elif len(codes[i])==2: # a state
@@ -260,6 +264,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
             print("Using web data file %s" % webpath)
             data_locs[locations[i]] = json.load(urllib.request.urlopen(webpath))
         else:
+            filepath = sourcepath + codes[i] + ".timeseries.json"
             try:
                 mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
                 today = datetime.date.today()

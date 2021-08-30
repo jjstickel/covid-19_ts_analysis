@@ -5,8 +5,8 @@ jupyter:
     text_representation:
       extension: .md
       format_name: markdown
-      format_version: '1.2'
-      jupytext_version: 1.8.0
+      format_version: '1.3'
+      jupytext_version: 1.11.4
   kernelspec:
     display_name: Python 3
     language: python
@@ -21,10 +21,8 @@ This purpose of this notebook (and repository) is to make available a set of tim
 analyses of COVID-19 data. Data sources are:
 
 - https://github.com/CSSEGISandData/COVID-19 (COVID-19 data)
-- https://covidtracking.com/ (COVID-19 US data)
+- https://covidactnow.org (COVID-19 US data)
 - https://data.worldbank.org/indicator/sp.pop.totl (world populations)
-- https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US populations)
-- http://www.healthdata.org/ (hospital capacity)
 - https://www.cdc.gov/ (total US deaths)
 
 By default, the COVID-19 data is grabbed from web sources directly. See arguments to functions for specifying files in your local path.
@@ -37,6 +35,8 @@ Dependencies are:
 - `pandas`
 - `matplotlib`
 - `cvxopt`
+- `urllib`
+- `datetime`
 - `scikit.datasmooth` (can be pip installed)
 
 Also, `covid19ts` and `covid_plots` are part of this repository.
@@ -49,22 +49,22 @@ Open this link in a new tab (right-click, "open link in new tab") for a web-base
 # import modules
 import numpy as np
 # locally defined modules
-from covid19ts import covid19_global, covid19_ctp
+from covid19ts import covid19_global, covid19_can
 import covid_plots as cvp
 ```
 
 # User input
 
-Put up to 7 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). At the moment, `US` must be in the list because it is included in all of the US plots.
+Put up to 7 countries of interest in the `countries` list. Must be the same name used in the J-H global files, and (at the moment), it must be a single entry in the file (e.g., China has multiple entries and will cause an Exception). 
 
 ```python
 countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
 ```
 
-Put up to 6 US states in the `US_locs` list. 
+Put up to 7 US states in the `US_locs` list. `US` should be included if you want it to be analyzed along with the states. (county locations TBD)
 
 ```python
-US_locs = ["Colorado", "California", "New York", "Florida", "Arizona", "South Dakota"]
+US_locs = ["US", "Colorado", "California", "New York", "Florida", "Arizona", "South Dakota"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
@@ -76,17 +76,19 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 ```python
 # days before today to analyze; more days takes a little more processing time; use `None` to use all data
 dbf = 200 
+nsub = 2 # subsample every `nsub` points
+if (nsub > 14):
+    raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 # global data
 lmbd = 5e-5 # smoothing parameter, larger means more smooth
-corona = covid19_global(countries, lmbd=lmbd, dbf=dbf)
+corona = covid19_global(countries, lmbd=lmbd, dbf=dbf, nsub=nsub)
 # extract common variables for ease-of-use
 mult = corona["mult"]
 nctry = len(countries)
 dates = corona["dates"]
 lastday = dates[-1]
 # US data
-nUSloc = len(US_locs)
-coronaUS_ctp = covid19_ctp(US_locs, lastday, lmbd=lmbd, dbf=dbf)
+coronaUS_can = covid19_can(US_locs, lastday, lmbd=lmbd, dbf=dbf, nsub=nsub)
 ```
 
 *Estimate* "active" cases by presuming all confirmed cases have recovered or died in an aeverage number of days. Estimate of recovery time from:
@@ -96,28 +98,31 @@ coronaUS_ctp = covid19_ctp(US_locs, lastday, lmbd=lmbd, dbf=dbf)
 Unfortunately, recovered data is really poor, and so directly calculating active cases is not useful.
 
 ```python
-rectime = 14 # days, 1 day = 1 data point -- you can change this number to see the affect on estimated active cases
+rectime = 14 # days, 1 day = 1 original data point
+recsamp = np.int(14/nsub)
 for country in countries:
     ctryd = corona[country]
-    ctryd["acvest_pc"] = ctryd["cnf_pc"].copy()
-    ctryd["acvest_pc"][:rectime] = np.nan
-    ctryd["acvest_pc"][rectime:] = ctryd["acvest_pc"][rectime:] - ctryd["cnf_pc"][:-rectime]
-for loc in coronaUS_ctp["locs"]:
-    locd = coronaUS_ctp[loc]
-    locd["acvest_pc"] = locd["cnf_pc"].copy()
-    locd["acvest_pc"][:rectime] = np.nan
-    locd["acvest_pc"][rectime:] = locd["acvest_pc"][rectime:] - locd["cnf_pc"][:-rectime]
+    ctryd["acvest_pc"] = ctryd["cnf_pc_h"].copy()
+    ctryd["acvest_pc"][:recsamp] = np.nan
+    ctryd["acvest_pc"][recsamp:] = ctryd["acvest_pc"][recsamp:] - ctryd["cnf_pc"][:-recsamp]
+    # some anomlies in the case data can lead to negative active cases for this
+    # crude estimation
+    ctryd["acvest_pc"][ctryd["acvest_pc"] < 0] = 0
+for loc in coronaUS_can["locs"]:
+    locd = coronaUS_can[loc]
+    locd["acvest_pc"] = locd["cnf_pc_h"].copy()
+    locd["acvest_pc"][:recsamp] = np.nan
+    locd["acvest_pc"][recsamp:] = locd["acvest_pc"][recsamp:] - locd["cnf_pc"][:-recsamp]
+    locd["acvest_pc"][locd["acvest_pc"] < 0] = 0
 ```
 
 # Plotting
 
 ```python
 # plot setup
-#reload(cvp)
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
-#cvp.critlow_readable(corona) # provide convenient readable terms for time labeling
 ```
 
 # Per capita cases (confirmed and deaths)
@@ -129,13 +134,13 @@ cvp.fh = 6
 cvp.per_capita_global_plot(corona, lastday, days_before=dbf)
 ```
 
-The US has a lot more confirmed per-capita cases than many countries now. This could be attributed to more testing at this point. Deaths continue to rise at a near linear pace. See rate plots below.
+The US has a lot more confirmed per-capita cases than many countries. This could be attributed to more testing. Deaths continue to rise with recent uptick presumably due to Delta variant. See rate plots below.
 
 
 ## US
 
 ```python
-cvp.per_capita_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+cvp.per_capita_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
 US local per capita data. 
@@ -156,13 +161,13 @@ Growth rate is the derivative of the cases (i.e., instantaneous slope for each d
 ## US
 
 ```python
-cvp.rate_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+cvp.rate_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
 US local rate data. 
 
 
-# Active cases, hospitalizations, tests, and case fatality ratio (CFR)
+# Active cases, CFR, hospitalizations, and vaccinations. 
 
 
 ## Global
@@ -171,7 +176,7 @@ US local rate data.
 cvp.active_CFR_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred months ago, we are now clearly having more waves.
+Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred long ago, we are now clearly having more waves.
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. Generally, more testing increases the denominator of the ratio and makes the CFR *lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
@@ -179,25 +184,19 @@ The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is
 ## US
 
 ```python
-cvp.active_hosp_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+cvp.active_hosp_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-The Covid Tracking Project has data on hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. Waves of hospitalizations follow closely active cases.
+The Covid Act Now data has hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. Waves of hospitalizations follow closely active cases.
 
 ```python
-cvp.tests_CFR_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+cvp.icu_vacc_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-US total tests and CFR. Testing has passed 100% of the population in NY (some people are getting multiple tests). As testing increases, so does the number of positive cases that are identified for people who are less likely to be hospitalized and die. This results in a lower CFR.
+ICU bed usage (COVID-19 and total) is shown on the left, and vaccinations (percent of population) on the right. There is a slight inverse correlation between vaccinations and ICU bed usage (and hospitalizations as shown in the figure above). Overall, there is not a large spread between vaccinations between states.
 
 ```python
-cvp.hosp_cap_deaths_US_plot(coronaUS_ctp, lastday, days_before=dbf)
+cvp.deaths_persp_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-How bad is COVID-19 really? Here are two figures to help put it in perspective. Hospitalizations are plotted with hospital capacity (left). There is still more hospital capacity, but COVID-19 patients are displacing those with other injuries and illnesses. 
-
-Deaths are plotted with the total yearly US deaths in 2018 (right). We are approaching 20% of yearly deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.2% of the population. Heard immunity, without a vaccine, could result in ~2-4 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
-
-```python
-
-```
+How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths in 2018. Total COVID-19 deaths (per capita) are about 20% of yearly US deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.2% of the population. Without a vaccine, near full penetration of COVID-19, i.e., becoming "endemic", could result in ~2-4 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
