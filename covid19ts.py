@@ -12,21 +12,16 @@ https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.htm
 
 ## TODO:
 # - (see list in `analyze_covid_time_series.py`)
-# - code cleanup! delete commented code that is not needed, JJS 8/27/21
-
-# attempting to use https://apidocs.covidactnow.org/
-# my key = d4e3714137fb41eb93d0d17fab7e9387
-# https://api.covidactnow.org/v2/states.json?apiKey=YOUR_KEY_HERE
-# https://api.covidactnow.org/v2/states.json?apiKey=d4e3714137fb41eb93d0d17fab7e9387
 
 import numpy as np
 import pandas as pd
 import json
-import wget
+import urllib.request
+import os.path
+import datetime
 #import regularsmooth as ds # my local copy
 import scikits.datasmooth as ds # pip installed
 
-# FIXME:  update population file
 popfile = ("API_SP.POP.TOTL_DS2_en_csv_v2_2763937/"
            "API_SP.POP.TOTL_DS2_en_csv_v2_2763937.csv")
 
@@ -36,8 +31,6 @@ apikey = "d4e3714137fb41eb93d0d17fab7e9387"
 ##### scaling factor for cases, i.e., "x per mult" ######
 #multval=1e6
 multval=1e4
-#critlow = 10*1e-6 # for time zero, using confirmed
-#critlow = 0.1*1e-6 # for time zero, using deaths
 
 
 def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
@@ -61,23 +54,35 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
     """
     
     # read in Johns Hopkins' data tables
-    pathname = setup_path(websource, JHCSSEpath)
-    # read in global data
-    data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_global.csv")
-    data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_global.csv")
-    data_recovered = pd.read_csv(pathname + "time_series_covid19_recovered_global.csv")
-    # convert some pesky NaN values (for missing labels) to strings
-    for data in [data_confirmed, data_deaths, data_recovered]:
-        data["Province/State"] = data["Province/State"].values.astype("str")
+    data = {}
+    webbase = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+    for dataname in ["confirmed", "deaths", "recovered"]:
+        filename = "time_series_covid19_" + dataname + "_global.csv"
+        filepath = JHCSSEpath + filename
+        webpath = webbase + filename
+        if websource:
+            print("Using web data file %s" % webpath)
+            data[dataname] = pd.read_csv(webpath)
+        else:
+            try:
+                mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
+                today = datetime.date.today()
+                if (today-mdate).days > 1:
+                    raise ValueError("File is older than 1 day") # will this ever print?
+                else:
+                    print("Using existing file %s" % filepath)
+            except:
+                print("Downloading %s" % filepath)
+                urllib.request.urlretrieve(webpath, filepath)
+            data[dataname] = pd.read_csv(filepath)
 
-    ## changing `dbf` approach in conjunction with new `nsub` feature, JJS 8/24/21
-    # # process `dbf`
-    # if dbf is not None:
-    #     dbf = -dbf
-        
+    # convert some pesky NaN values (for missing labels) to strings
+    for key, dataset in data.items():
+        dataset["Province/State"] = dataset["Province/State"].values.astype("str")
+
     # presume these files all have the same "fixed" structure -- could put in a
     # check at some point
-    header = data_confirmed.columns.values
+    header = data["confirmed"].columns.values
     dates = pd.to_datetime(header[4:])
     dates = np.flip(np.flip(dates)[:dbf:nsub])
 
@@ -91,16 +96,14 @@ def covid19_global(countries, websource=True, JHCSSEpath=None, file_pop=popfile,
         corona[country] = ctryd
         ctryd['name'] = country
         ctryd['population'] = read_pop(data_pop, country)
-        #ctryd['cnf'] = read_cases(data_confirmed, country)[dbf:]
-        arr = read_cases(data_confirmed, country)
+        arr = read_cases(data["confirmed"], country)
         ctryd['cnf'] = np.flip(np.flip(arr)[:dbf:nsub])
-        arr = read_cases(data_deaths, country)
+        arr = read_cases(data["deaths"], country)
         ctryd['dth'] = np.flip(np.flip(arr)[:dbf:nsub])
-        arr = read_cases(data_recovered, country)
+        arr = read_cases(data["recovered"], country)
         ctryd['rec'] = np.flip(np.flip(arr)[:dbf:nsub])
 
     corona["mult"] = mult
-    #corona["critlow"] = critlow
     corona["dates"] = dates
 
     perform_operations(corona, lmbd, mult)
@@ -131,15 +134,31 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     """
     
     # read in Johns Hopkins' data tables
-    pathname = setup_path(websource, JHCSSEpath)
-    # read in US data
-    data_confirmed = pd.read_csv(pathname + "time_series_covid19_confirmed_US.csv")
-    # note:  data_deaths has an extra population column
-    data_deaths = pd.read_csv(pathname + "time_series_covid19_deaths_US.csv")
-
-      # presume these files all have a known "fixed" structure -- could put in a
+    data = {}
+    webbase = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+    for dataname in ["confirmed", "deaths"]:
+        filename = "time_series_covid19_" + dataname + "_US.csv"
+        filepath = JHCSSEpath + filename
+        webpath = webbase + filename
+        if websource:
+            print("Using web data file %s" % webpath)
+            data[dataname] = pd.read_csv(webpath)
+        else:
+            try:
+                mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
+                today = datetime.date.today()
+                if (today-mdate).days > 1:
+                    raise ValueError("File is older than 1 day") # will this ever print?
+                else:
+                    print("Using existing file %s" % filepath)
+            except:
+                print("Downloading %s" % filepath)
+                urllib.request.urlretrieve(webpath, filepath)
+            data[dataname] = pd.read_csv(filepath)
+    
+    # presume these files all have a known "fixed" structure -- could put in a
     # check at some point
-    header = data_confirmed.columns.values
+    header = data["confirmed"].columns.values
     dates = pd.to_datetime(header[11:])
     dates = np.flip(np.flip(dates)[:dbf:nsub])
 
@@ -149,30 +168,27 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
         locd = dict()
         corona[loc] = locd
         locd['name'] = loc
-        # handle data handling differently by whether location is a state or
+        # perform data handling differently by whether location is a state or
         # county--if a state, then need to read in all the state entries and
         # sum
         if "," in loc: # it's a county
             idx = loc.find(",")
             county = loc[:idx]
             state = loc[idx+2:]
-            loc_bool = np.logical_and(data_deaths["Admin2"] == county,
-                                      data_deaths["Province_State"] == state)
+            loc_bool = np.logical_and(data["deaths"]["Admin2"] == county,
+                                      data["deaths"]["Province_State"] == state)
             if loc_bool.sum() != 1:
                 raise Exception("%s is not in the data files, or occurs more than once"
                                 % loc)
-            #locd["population"] = data_deaths[loc_bool]["Population"].values[0]
-            #locd["cnf"] = data_confirmed[loc_bool].iloc[0,11:].values
-            #locd["dth"] = data_deaths[loc_bool].iloc[0,12:].values
         else: # it's a state
-            loc_bool = data_deaths["Province_State"] == loc
+            loc_bool = data["deaths"]["Province_State"] == loc
             if loc_bool.sum() < 1:
                 raise Exception("%s is not in the data files" % loc)
         # these lines should work even for county location with single line...
-        locd["population"] = data_deaths[loc_bool]["Population"].sum()
-        arr = data_confirmed[loc_bool].iloc[:, 11:].values.sum(axis=0)
+        locd["population"] = data["deaths"][loc_bool]["Population"].sum()
+        arr = data["confirmed"][loc_bool].iloc[:, 11:].values.sum(axis=0)
         locd["cnf"] = np.flip(np.flip(arr)[:dbf:nsub])
-        arr = data_deaths[loc_bool].iloc[:, 12:].values.sum(axis=0)
+        arr = data["deaths"][loc_bool].iloc[:, 12:].values.sum(axis=0)
         locd["dth"] = np.flip(np.flip(arr)[:dbf:nsub])
 
     corona["mult"] = mult
@@ -183,9 +199,6 @@ def covid19_US(locations, websource=True, JHCSSEpath=None, mult=multval, lmbd=5e
     return corona
 
 
-# reworking to use covid-act-now datasets
-# Is `lastday` still necessary? I think it was a way to make different data
-# sets coincide if they had different last-day records, so probably, JJS 8/26/21
 def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multval, lmbd=5e-5,
                 dbf=None, nsub=1):
     """Read in Covid Act Now COVID-19 timeseries data for the US locations
@@ -219,9 +232,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     # # at least icu-beds seem to be, 8/26/21
     # hosp_data = pd.read_csv("Summary_stats_all_locs.csv")
     # hosp_data.set_index("location_name", inplace=True)
-
-    ## TODO:  if websource = False, look for an up-to-date file; if not, dowload the files
-    
+   
     # read state data
     nlocs = len(locations)
     ### FIXME, extract state part of location, and use FIPS codes for counties,
@@ -235,21 +246,32 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
             codes.append( codetable.loc[loc]["Code"] )
 
     data_locs = dict()
-    #for code in codes:
     ##### TODO:  enable county files ####
     for i in range(nlocs):
-        if websource:
-            path = ("https://covidtracking.com/api/v1/states/" + codes[i].lower()
-                    + "/daily.json") # FIXME
-            data_locs[locations[i]] = pd.read_json(path)
+        filepath = sourcepath + codes[i] + ".timeseries.json"
+        if codes[i]=="US":
+            webbase = "https://api.covidactnow.org/v2/country/"
+        elif len(codes[i])==2: # a state
+            webbase = "https://api.covidactnow.org/v2/state/"
         else:
-            filepath = sourcepath + codes[i] + ".timeseries.json"
-            data_locs[locations[i]] = json.load(open(filepath))
+            webbase = "https://api.covidactnow.org/v2/county/"
+        webpath = webbase + codes[i] + ".timeseries.json?apiKey=" + apikey
+        if websource:
+            print("Using web data file %s" % webpath)
+            data_locs[locations[i]] = json.load(urllib.request.urlopen(webpath))
+        else:
+            try:
+                mdate = datetime.date.fromtimestamp(os.path.getmtime(filepath))
+                today = datetime.date.today()
+                if (today-mdate).days > 1:
+                    raise ValueError("File is older than 1 day") # will this ever print?
+                else:
+                    print("Using existing file %s" % filepath)
+            except:
+                print("Downloading %s" % filepath)
+                urllib.request.urlretrieve(webpath, filepath)
+            data_locs[locations[i]] = json.load(open(filepath))  
 
-    # # read in population data -- should be in location-specific files now, 8/26/21
-    # pops = pd.read_csv("nst-est2019-alldata.csv")
-    # pops.set_index("NAME", inplace=True)
-    
     # set of relevant keys, from the set in "actualsTimeseries"
     # ['cases', 'deaths', 'positiveTests', 'negativeTests',
     #    'contactTracers', 'hospitalBeds', 'icuBeds', 'newCases',
@@ -259,8 +281,6 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     #    'vaccinesAdministered']
     # note that `hospitalBeds` and `icuBeds` expand further into
     # ['capacity', 'currentUsageTotal', 'currentUsageCovid','typicalUsageRate']
-    ## ignoring `hospitalBeds` for now since there seems to be no capacity data
-    ## (will see if any states/counties have this data), so those columns apply to ICU only
     keys = ['cases', 'deaths', 'positiveTests', 'negativeTests',
             'hospCapacity', 'hospTotal', 'hospCovid', 'hospTypical',
             'icuCapacity', 'icuTotal', 'icuCovid', 'icuTypical',
@@ -283,8 +303,8 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         data_df = pd.DataFrame(data["actualsTimeseries"])
         # remove the time-series objects from data (not entirely necessary, but
         # will save some ram and maybe some computational cost)
-        #for key in ["actualsTimeseries", "metricsTimeseries", "riskLevelsTimeseries"]:
-        #    data.pop(key)
+        for key in ["actualsTimeseries", "metricsTimeseries", "riskLevelsTimeseries"]:
+            data.pop(key)
         # expand hospital and icu columns
         hosp_df = pd.DataFrame(data_df["hospitalBeds"].values.tolist())
         hosp_df.rename(columns={"capacity": "hospCapacity",
@@ -298,10 +318,8 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
                                "typicalUsageRate": "icuTypical"}, inplace=True)
         # remove hospital and icu bed columns that are actually elements of dictionaries
         data_df = data_df.drop(columns=["hospitalBeds", "icuBeds"])
-        # add back icu bed columns
+        # add back hospital and icu bed columns
         data_df = pd.concat([data_df, hosp_df, icu_df], axis=1)
-        #print(data_df.shape)
-        #print(data_df.columns.values) # test that concat worked properly
 
         # get population
         pop = data["population"]
@@ -312,7 +330,6 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         # capacity = hosp_data["all_bed_capacity"][loc] 
         
         # get and process dates -- US and each sub-location may have different dates
-        #dates = pd.to_datetime(data["date"].apply(int_to_date).values)[dbf:] # for c-t-p
         dates = pd.to_datetime(data_df["date"].values)
         dates = np.flip(np.flip(dates)[:dbf:nsub])
         ndays = dates.size
@@ -378,21 +395,12 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     return corona
 
 
-# this was needed for covid-tracking-project and is no longer used, JJS 8/27/21
-def int_to_date(dateint):
-    """ convert integer of the form yyyymmdd to date object """
-    datestr = str(dateint)
-    return np.datetime64(datestr[:4] + "-" + datestr[4:6] + "-" + datestr[6:8])
+# # this was needed for covid-tracking-project and is no longer used, JJS 8/27/21
+# def int_to_date(dateint):
+#     """ convert integer of the form yyyymmdd to date object """
+#     datestr = str(dateint)
+#     return np.datetime64(datestr[:4] + "-" + datestr[4:6] + "-" + datestr[6:8])
 
-
-def setup_path(websource, JHCSSEpath):
-    if websource:
-        pathname = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
-    elif JHCSSEpath is None:
-        raise ValueError("If websource=False, you need to provide a path for the JH CSSE data")
-    else:
-        pathname = JHCSSEpath
-    return pathname
 
 def read_cases(data, country):
     """
@@ -417,7 +425,7 @@ def read_pop(data, country):
         raise Exception("%s is not in the population data file" % country)
     return row.loc[:, "2020"].values[0]
 
-# normalization and smoothing
+# normalization
 def per_capita(locd, mult):
     """
     calculate per capita cases (confirmed, deaths, and recovered)
@@ -430,16 +438,6 @@ def per_capita(locd, mult):
         locd["rec_pc"] = locd["rec"]/pop*mult
     return
 
-# def time_zero(dates, locd, mult=mult, criteria=critlow):
-#     """
-#     shift elapsed time to specified number of _smoothed per-capita cases_
-#     """
-#     criteval = locd["cnf_pc_h"] > criteria*mult # use confirmed metric for time zero
-#     #criteval = locd["dth_pc"] > criteria*mult # use death metric for time zero
-#     idx0 = np.nonzero(criteval)[0][0]
-#     locd["idx0"] = idx0
-#     locd["days"] = (dates - dates[idx0]).astype('timedelta64[D]').values
-#     return
 
 def perform_operations(corona, lmbd, mult):
     """

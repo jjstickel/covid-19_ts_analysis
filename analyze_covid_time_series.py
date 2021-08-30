@@ -14,10 +14,8 @@ data sources
 # TODO:
 # - Process countries with multiple entries. Will need to make sure that the
 #   sum provides the correct result
+# - Enable analysis for US counties
 # - (long term) switch from dict to class
-# - switch to use other databases, especially for state data with
-#   hospitalizations and vaccinations (see covid-tracking project web page on
-#   sources) -- in progress with api.covidactnow.org, 8/25/21
 # - analyze fraction vaccinated
 # - update hospitalization plots with icu data -- also fraction icu beds used (separate plot)
 
@@ -52,7 +50,8 @@ if (nsub > 14):
 
 saveplots = False
 
-JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/"
+#JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/" # github 
+JHCSSEpath = "../JH_COVID-19/" # direct download
 
 lmbd = 5e-5
 mult = 1e4
@@ -66,12 +65,12 @@ nctry = len(countries)
 nUSloc = len(US_locs)
 
 dates = corona["dates"]
-lastday = dates[-1]  
+lastday = dates[-1]
 
 # ## not using this data set for the time being -- will be interesting to check
-# ## for differences with the other US data set
-# coronaUS = covid19_US(US_locs, websource=False, JHCSSEpath=JHCSSEpath, lmbd=lmbd, mult=mult,
-#                       dbf=dbf, nsub=nsub)
+# ## for differences with the other US data set; cannot include `US` as one of the locations
+# coronaUS = covid19_US(US_locs[1:], websource=False, JHCSSEpath=JHCSSEpath,
+#                       lmbd=lmbd, mult=mult, dbf=dbf, nsub=nsub)
 # if not np.alltrue(corona["dates"] == coronaUS["dates"]):
 #     raise ValueError("the dates from the global and US files do not match")
 
@@ -120,11 +119,15 @@ N+=1
 cvp.rate_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.active_hosp_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+
+N+=1
+
+
 #N+=1
 # this plot isn't very interesting anymore -- make a vaccination plot instead of tests
 #cvp.tests_CFR_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
-N+=1
-cvp.hosp_cap_deaths_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+# N+=1
+# cvp.hosp_cap_deaths_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
 # # custom analysis

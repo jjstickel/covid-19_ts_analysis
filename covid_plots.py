@@ -414,6 +414,16 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     return
 
 
+
+
+
+
+
+
+
+
+#### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####
+
 def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     locs = corona["locs"]
     nloc = len(locs)
