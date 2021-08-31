@@ -43,12 +43,12 @@ US_locs = ["US", "Colorado", "New York", "Arizona", "Florida", "Oregon", "South 
 #US_locs = ["Colorado", "New York", "New York, New York"]
 
 #dbf = None
-dbf = 200
-nsub = 2 # subsample every `nsub` points
+dbf = 300
+nsub = 3 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 
-saveplots = False
+saveplots = True
 
 #JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/" # github 
 JHCSSEpath = "../JH_COVID-19/" # direct download
@@ -84,7 +84,7 @@ coronaUS_can = covid19_can(US_locs, lastday, websource=False, sourcepath="../cov
 # - https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext
 # - https://towardsdatascience.com/visual-notes-from-singapores-first-100-fully-recovered-covid-19-patients-aad7f2e1d0a0
 rectime = 14 # days, 1 day = 1 original data point
-recsamp = np.int(14/nsub)
+recsamp = int(14/nsub)
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc_h"].copy()
