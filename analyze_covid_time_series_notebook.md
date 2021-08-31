@@ -64,7 +64,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
 Put up to 7 US states in the `US_locs` list. `US` should be included if you want it to be analyzed along with the states. (county locations TBD)
 
 ```python
-US_locs = ["US", "Colorado", "California", "New York", "Florida", "Arizona", "South Dakota"]
+US_locs = ["US", "Colorado", "Oregon", "New York", "Florida", "Arizona", "South Dakota"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
@@ -74,9 +74,10 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 - determine rates (i.e., the derivative) for cases
 
 ```python
-# days before today to analyze; more days takes a little more processing time; use `None` to use all data
-dbf = 200 
-nsub = 2 # subsample every `nsub` points
+# days before today (`dbf`) to analyze, and subsampling by `nsub`; more data takes a little more processing time;
+# use `dbf = None` and `nsub = 1` to use all data
+dbf = 300 
+nsub = 3 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 # global data
@@ -123,6 +124,7 @@ for loc in coronaUS_can["locs"]:
 cvp.rcParams.update({'font.size': 14})
 cvp.fw = 8
 cvp.fh = 6
+cvp.ms = 5
 ```
 
 # Per capita cases (confirmed and deaths)
@@ -193,10 +195,10 @@ The Covid Act Now data has hospitalizations by US state. I find it informative t
 cvp.icu_vacc_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-ICU bed usage (COVID-19 and total) is shown on the left, and vaccinations (percent of population) on the right. There is a slight inverse correlation between vaccinations and ICU bed usage (and hospitalizations as shown in the figure above). Overall, there is not a large spread between vaccinations between states.
+ICU bed usage (COVID-19 and total) is shown on the left, and vaccinations (percent of population) on the right. There is a slight inverse correlation between vaccinations and ICU bed usage (and hospitalizations as shown in the figure above). An exception is Oregan, with currently high ICU bed usage despite higher vaccinations. Overall, there is not a large spread in vaccinations between states compared to the spread in the COVID-19 incidence data.
 
 ```python
 cvp.deaths_persp_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths in 2018. Total COVID-19 deaths (per capita) are about 20% of yearly US deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality may be 0.2% of the population. Without a vaccine, near full penetration of COVID-19, i.e., becoming "endemic", could result in ~2-4 times this many deaths, or 0.5% of the population (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths in 2018. Total COVID-19 deaths so far (per capita) are about 20% of yearly US deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality is so far about 0.2% of the population. Without a vaccine, near full penetration of COVID-19, i.e., becoming "endemic", could result in up to 10 times this many deaths, or 2% of the population, mostly among the old and sick (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).

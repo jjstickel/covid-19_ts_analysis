@@ -37,7 +37,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 
 # US locations (`US`, States, and counties [TBD]), up to 7
 #US_locs = ["US", "Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-US_locs = ["US", "Colorado", "New York", "Arizona", "Florida", "Oregon", "South Dakota"]
+US_locs = ["US", "Colorado", "Oregon", "New York", "Florida", "Arizona", "South Dakota"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["Colorado", "Washington", "California", "New York"]
 #US_locs = ["Colorado", "New York", "New York, New York"]
@@ -48,7 +48,7 @@ nsub = 3 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 
-saveplots = True
+saveplots = False
 
 #JHCSSEpath = "../JH_COVID-19/csse_covid_19_data/csse_covid_19_time_series/" # github 
 JHCSSEpath = "../JH_COVID-19/" # direct download

@@ -34,7 +34,8 @@ lw = 1.5
 
 # us yearly deaths
 us_tot_d = 87. # per 10,000, average of 2017-2019
-IFR = 0.00725153*1e4 # average IFR, see covid-ifr.py
+#IFR = 0.00725153*1e4 # average IFR, see covid-ifr.py
+IFR = 0.0217777*1e4 # average IFR, see covid-ifr.py, updated since 3/21
 
 #### global plotting functions #####
 
@@ -98,7 +99,7 @@ def per_capita_global_plot(corona, lastday, N=1, savefigs=False, days_before=Non
     subplot(121)
     for i in range(nctry):
         ctryd = corona[countries[i]]
-        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=0.5, ms=3)
+        plot(days, ctryd["cnf_pc"], sbl[i]+clr[i], mfc='none', mew=mew, ms=ms)
         #plot(days, ctryd["cnf_expfit"], '--'+clr[i], lw=lw)
         plot(days, ctryd["cnf_pc_h"], '-'+clr[i], label=ctryd["name"])
     scaled_max = max([corona[country]['cnf_pc'].max() for country in countries])
@@ -516,11 +517,11 @@ def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None)
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
     plot(days, us_tot_d*np.ones(days.shape), '--k')#, label="total deaths 2018")
-    annotate("total deaths 2018", (0.5, 0.9), xycoords="axes fraction")
+    annotate("total deaths 2018", (0.5, 0.42), xycoords="axes fraction")
     #plot(days, 0.75*IFR*np.ones(days.shape), ':k', lw=2)#, label="herd immunity?")
     fill_between(days, 0.5*IFR*np.ones(days.shape), 1.0*IFR*np.ones(days.shape),
                  facecolor="black", alpha=0.2)
-    annotate("Full endemic penetration?\n (no vaccine)", (0.6, 0.6),
+    annotate("Full endemic penetration?\n (no vaccine)", (0.6, 0.7),
              xycoords="axes fraction", ha="center")
     axis(xmin=days_before, xmax=0)
     xlabel("days before %s" % lastday.date())

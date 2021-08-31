@@ -261,7 +261,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
             webbase = "https://api.covidactnow.org/v2/county/"
         webpath = webbase + codes[i] + ".timeseries.json?apiKey=" + apikey
         if websource:
-            print("Using web data file %s" % webpath)
+            print("Using web data file %s" % webpath[:-40]) # strip the apikey
             data_locs[locations[i]] = json.load(urllib.request.urlopen(webpath))
         else:
             filepath = sourcepath + codes[i] + ".timeseries.json"
