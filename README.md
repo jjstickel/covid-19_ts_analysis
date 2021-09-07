@@ -10,4 +10,4 @@ analyses of COVID-19 data. Data sources are:
 
 The python notebook can be run "live" by clicking on this binder link (it may take awhile to load, be patient):
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covid_time_series_notebook.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covid_time_series_notebook.md)
