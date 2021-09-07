@@ -100,7 +100,7 @@ Unfortunately, recovered data is really poor, and so directly calculating active
 
 ```python
 rectime = 14 # days, 1 day = 1 original data point
-recsamp = np.int(14/nsub)
+recsamp = int(14/nsub)
 for country in countries:
     ctryd = corona[country]
     ctryd["acvest_pc"] = ctryd["cnf_pc_h"].copy()

@@ -4,13 +4,13 @@ Module with functions for reading and processing COVID-19 timeseries data
 https://github.com/CSSEGISandData/COVID-19
 https://covidactnow.org
 https://data.worldbank.org/indicator/sp.pop.totl
-https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 
 """
 
 # old usage data sets
 # - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US populations)
 # - http://www.healthdata.org/ (hospital capacity)
+# - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 
 # to be used:
 # https://github.com/kjhealy/fips-codes/blob/master/county_fips_master.csv -- county_fips_master.csv
@@ -230,7 +230,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
 
     """
     # to read state codes
-    codetable = pd.read_json("state_codes.json")
+    codetable = pd.read_json("data/state_codes.json")
     codetable.set_index("State", inplace=True)
 
     # # hospital bed capacities -- should be in location-specific files now, or

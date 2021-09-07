@@ -3,3 +3,7 @@ pandas
 matplotlib
 cvxopt
 scikit.datasmooth
+json
+urllib
+datetime
+jupytext
