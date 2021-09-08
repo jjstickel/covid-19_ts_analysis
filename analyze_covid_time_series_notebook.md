@@ -15,7 +15,7 @@ jupyter:
 
 # COVID-19 time-series analysis
 
-Jonathan Stickel, 2020
+Jonathan Stickel, 2020-2021
 
 This purpose of this notebook (and repository) is to make available a set of time-series
 analyses of COVID-19 data. Data sources are:

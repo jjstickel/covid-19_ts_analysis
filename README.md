@@ -8,6 +8,16 @@ analyses of COVID-19 data. Data sources are:
 - https://data.worldbank.org/indicator/sp.pop.totl (world population data)
 - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html (US population)
 
-The python notebook can be run "live" by clicking on this binder link (it may take awhile to load, be patient):
+The python script `analyze_covid_time_series.py` is setup to produce an example
+set of results. 
+
+A jupyter notebook is implemented via
+`analyze_covid_time_series_notebook.md` (jupytext required). A static snapshot
+including figures is available at:
+
+https://drive.google.com/file/d/1qKp0Jg7oCaA2qLzgY8b4MiHjpRPSL5CU/view?usp=sharing
+
+The python notebook can be run "live" by clicking on this binder link (it may
+take awhile to load, be patient):
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jjstickel/covid-19_ts_analysis.git/master?filepath=analyze_covid_time_series_notebook.md)
