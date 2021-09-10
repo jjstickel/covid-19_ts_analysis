@@ -4,7 +4,7 @@ Module with functions for reading and processing COVID-19 timeseries data
 https://github.com/CSSEGISandData/COVID-19
 https://covidactnow.org
 https://data.worldbank.org/indicator/sp.pop.totl
-
+https://github.com/kjhealy/fips-codes/blob/master/county_fips_master.csv 
 """
 
 # old usage data sets
@@ -12,8 +12,6 @@ https://data.worldbank.org/indicator/sp.pop.totl
 # - http://www.healthdata.org/ (hospital capacity)
 # - https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html
 
-# to be used:
-# https://github.com/kjhealy/fips-codes/blob/master/county_fips_master.csv -- county_fips_master.csv
 
 ## TODO:
 # - (see list in `analyze_covid_time_series.py`)
@@ -233,6 +231,12 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     codetable = pd.read_json("data/state_codes.json")
     codetable.set_index("State", inplace=True)
 
+    # read fips codes
+    # encoding problem, determined by opening in a text-editor -- can also be fixed by
+    # opening in LibreOffice and resaving
+    fipstable = pd.read_csv("data/county_fips_master.csv", encoding="iso8859_15")
+    fipstable.set_index("long_name", inplace=True)
+
     # # hospital bed capacities -- should be in location-specific files now, or
     # # at least icu-beds seem to be, 8/26/21
     # hosp_data = pd.read_csv("Summary_stats_all_locs.csv")
@@ -245,13 +249,20 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     # codes = codetable.loc[locations]["Code"].values # for an array, no loop
     codes = []
     for loc in locations:
-        if loc == "US":
+        if "," in loc: # it's a county
+            idx = loc.find(",")
+            county = loc[:idx]
+            state = loc[idx+2:]
+            #stateAbr = codetable.loc[state]["Code"] # will expect state code instead
+            # get fips code as a string with 5 digits, prepending 0 if needed
+            fipscode = "%05i" % fipstable.loc[county + " " + state]["fips"]
+            codes.append(fipscode)
+        elif loc == "US":
             codes.append("US")
         else:
             codes.append( codetable.loc[loc]["Code"] )
 
     data_locs = dict()
-    ##### TODO:  enable county files ####
     for i in range(nlocs):
         if codes[i]=="US":
             webbase = "https://api.covidactnow.org/v2/country/"
@@ -260,6 +271,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         else:
             webbase = "https://api.covidactnow.org/v2/county/"
         webpath = webbase + codes[i] + ".timeseries.json?apiKey=" + apikey
+        #print(webpath)
         if websource:
             print("Using web data file %s" % webpath[:-40]) # strip the apikey
             data_locs[locations[i]] = json.load(urllib.request.urlopen(webpath))
@@ -325,6 +337,8 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         data_df = data_df.drop(columns=["hospitalBeds", "icuBeds"])
         # add back hospital and icu bed columns
         data_df = pd.concat([data_df, hosp_df, icu_df], axis=1)
+        # convert None values to NaN
+        data_df.fillna(value=np.nan, inplace=True)
 
         # get population
         pop = data["population"]
@@ -346,7 +360,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         for key in keys:
             arr = data_df[key].values
             locd[key] = np.flip(np.flip(arr)[:dbf:nsub])
-            
+
         # compute per capita for metrics *I* want to look at (more may be added)
         locd["cnf_pc"] = locd["cases"]/pop*mult
         locd["dth_pc"] = locd["deaths"]/pop*mult

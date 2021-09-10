@@ -14,8 +14,6 @@ data sources
 # TODO:
 # - Process countries with multiple entries. Will need to make sure that the
 #   sum provides the correct result
-# - Enable analysis for US counties
-# - analyze fraction vaccinated
 # - switch to top-bottom plotting for most plots?
 # - (long term) switch from dict to class
 
@@ -35,12 +33,11 @@ ion()
 countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
-# US locations (`US`, States, and counties [TBD]), up to 7
-#US_locs = ["US", "Colorado", "California", "Arizona", "Florida", "Wisconsin", "South Dakota"]
-US_locs = ["US", "Colorado", "Oregon", "New York", "Florida", "Arizona", "South Dakota"]
+# US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]`
+# where ST is the state code)
+#US_locs = ["US", "Colorado", "Oregon", "New York", "Florida", "Arizona", "South Dakota"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
-#US_locs = ["Colorado", "Washington", "California", "New York"]
-#US_locs = ["Colorado", "New York", "New York, New York"]
+US_locs = ["Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
 
 #dbf = None
 dbf = 300
