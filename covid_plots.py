@@ -18,7 +18,7 @@ fh = 4
 clr = ['C%g' % i for i in range(10)]
 sbl = ["o", "s", "v", "d", "x", "^", "*"]
 mew = 0.5
-ms = 3
+ms = 4
 lw = 1.5
 # def critlow_readable(corona):
 #     # get inverse human readable form for t=0 criterium
@@ -467,6 +467,7 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     figure(N, figsize=(2*fw,fh))
     clf()
     subplot(121)
+    ymax = 100
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
@@ -474,9 +475,11 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
              ms=ms, label=locd["name"])
         plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
              mew=mew, ms=ms)
+        # sometimes total icu usage is over 100%, e.g., Alabama
+        ymax = max(ymax, locd["icu_total_frac"].max()*100)
     if days_before is not None:
         days_before = -days_before
-    axis(xmin=days_before, ymin=0, ymax=100)
+    axis(xmin=days_before, ymin=0, ymax=ymax)
     xlabel("days before %s" % lastday.date())
     ylabel("ICU bed usage (%)")
     annotate("Total ICU", (0.5, 0.85), xycoords="axes fraction", ha='center')

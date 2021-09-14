@@ -356,9 +356,10 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         locd["dates"] = dates
         locd["days"] = days
         
-        # transfer meaningful data
+        # interpolate nan values, subsample, and transfer meaningful data
         for key in keys:
-            arr = data_df[key].values
+            # arr = data_df[key].values # without interpolation
+            arr = data_df[key].interpolate().values
             locd[key] = np.flip(np.flip(arr)[:dbf:nsub])
 
         # compute per capita for metrics *I* want to look at (more may be added)
