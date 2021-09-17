@@ -3,7 +3,8 @@ module of plotting function-routines for covid data
 """
 
 ## TODO:
-# - check and fix global plots
+# - plot icu per-cap vs icu frac
+# - plot vaccinations and tests together
 
 from decimal import Decimal
 from datetime import datetime
@@ -161,7 +162,7 @@ def rate_global_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     axis(xmin = days_before)#, ymax = 1.5e3/mult)
     xlabel("days before %s" % dates[-1].date())
     ylabel("rate [deaths per $10^%i$ / day]" % np.log10(mult))
-    legend(loc="best")
+    legend(loc="upper left")
     title("growth rate of deaths");
     if savefigs:  savefig("plots/rate_global.pdf", bbox_inches="tight")
     return
@@ -409,7 +410,7 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
     #ylabel("hospitalizations [%]")
-    legend(loc='best')
+    legend(loc='upper left')
     title("current COVID-19 hospitalizations")
     if savefigs:  savefig("plots/active_hosp_US.pdf", bbox_inches="tight")
     return
@@ -476,9 +477,10 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
         plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
              mew=mew, ms=ms)
         # sometimes total icu usage is over 100%, e.g., Alabama
-        ymax = max(ymax, locd["icu_total_frac"].max()*100)
+        ymax = max(ymax, np.nanmax(locd["icu_total_frac"])*100)
     if days_before is not None:
         days_before = -days_before
+    ymax = min(120, ymax) # to counter some wild data, e.g. Anchorage Municipality, AK
     axis(xmin=days_before, ymin=0, ymax=ymax)
     xlabel("days before %s" % lastday.date())
     ylabel("ICU bed usage (%)")
