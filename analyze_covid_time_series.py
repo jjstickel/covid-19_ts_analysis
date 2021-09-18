@@ -41,8 +41,8 @@ US_locs = ["US", "Colorado", "Idaho", "New York", "Alaska", "Arizona", "Alabama"
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO",
 #           "Alaska", "Anchorage Municipality, AK"]
 
-dbf = None
-#dbf = 300
+#dbf = None
+dbf = 550
 nsub = 7 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)

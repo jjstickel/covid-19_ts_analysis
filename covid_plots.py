@@ -397,13 +397,16 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     title("active cases")
     # hospitalizations per capita
     subplot(122)
+    idxnan = np.inf
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
         plot(days, locd["hosp_covid_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
              ms=ms, label=locd["name"])
-#        if capacity:  # no longer using this, switching to ICU data with covid act now data
-#            plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
+        #if capacity:  # no longer using this, switching to ICU data with covid act now data
+        #    plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
+        idxnan = min(idxnan, np.nonzero(np.isnan(locd["hosp_covid_pc"]))[0][-1])
+    days_before = max(days_before, days[idxnan])
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
@@ -466,13 +469,16 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     clf()
     # icu per cap
     subplot(121)
+    if days_before is not None:
+        days_before = -days_before
+    idxnan = np.inf
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
         plot(days, locd["icu_covid_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
              ms=ms, label=locd["name"])
-    if days_before is not None:
-        days_before = -days_before
+        idxnan = min(idxnan, np.nonzero(np.isnan(locd["icu_covid_pc"]))[0][-1])
+    days_before = max(days_before, days[idxnan])
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())  
     ylabel("icu beds per $10^%i$" % np.log10(mult))
@@ -481,7 +487,6 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     # icu fraction
     subplot(122)
     ymax = 100.0
-    idxnan = days.size-1
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
@@ -489,8 +494,7 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
              ms=ms, label=locd["name"])
         plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
              mew=mew, ms=ms)
-        idxnan = min(idxnan, np.nonzero(np.isnan(locd["icu_covid_pc"]))[0][-1])
-        # sometimes total icu usage is over 100%, e.g., Alabama
+         # sometimes total icu usage is over 100%, e.g., Alabama
         ymax = max(ymax, np.nanmax(locd["icu_total_frac"])*100)
     plot(days[idxnan:], 100*np.ones(days[idxnan:].size), 'k--', lw=0.5)
     ymax = min(120, ymax) # to counter some wild data, e.g. Anchorage Municipality, AK
@@ -516,8 +520,8 @@ def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
-        plot(days, locd["test_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms, mfc='none',
-             label=locd["name"])
+        plot(days, locd["test_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
+             mfc='none', label=locd["name"])
     if days_before is not None:
         days_before = -days_before
     axis(xmin=days_before)
@@ -527,6 +531,7 @@ def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     title("total tests")
     # vacc frac
     subplot(122)
+    idxnan = np.inf
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
@@ -534,6 +539,8 @@ def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
 #             mfc='none')
         plot(days, locd["vacc_full_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
              mfc='none', label=locd["name"])
+    idxnan = min(idxnan, np.nonzero(np.isnan(locd["vacc_full_frac"]))[0][-1])
+    days_before = max(days_before, days[idxnan])
     #axis(xmin=days_before, ymin=0, ymax=100)
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())
@@ -543,9 +550,7 @@ def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     if savefigs:  savefig("plots/tests_vacc_US.pdf", bbox_inches="tight")
     return
 
-    
 
-#### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####
 def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     if days_before is not None:
         days_before = -days_before
@@ -562,12 +567,12 @@ def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None)
     maxvals = [np.nanmax(corona[loc]['dth_pc']) for loc in locs]
     scaled_max = max(maxvals)
     plot(days, us_tot_d*np.ones(days.shape), '--k')#, label="total deaths 2018")
-    annotate("total deaths 2018", (0.5, 0.42), xycoords="axes fraction")
+    annotate("total deaths 2018", (0.5, 0.85), xycoords="axes fraction")
     #plot(days, 0.75*IFR*np.ones(days.shape), ':k', lw=2)#, label="herd immunity?")
-    fill_between(days, 0.5*IFR*np.ones(days.shape), 1.0*IFR*np.ones(days.shape),
-                 facecolor="black", alpha=0.2)
-    annotate("Full endemic penetration?\n (no vaccine)", (0.6, 0.7),
-             xycoords="axes fraction", ha="center")
+    # fill_between(days, 0.5*IFR*np.ones(days.shape), 1.0*IFR*np.ones(days.shape),
+    #              facecolor="black", alpha=0.2)
+    # annotate("Full endemic penetration?\n (no vaccine)", (0.6, 0.7),
+    #          xycoords="axes fraction", ha="center")
     axis(xmin=days_before, xmax=0)
     xlabel("days before %s" % lastday.date())
     ylabel("deaths per $10^%i$" % np.log10(mult))
@@ -576,6 +581,9 @@ def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None)
     title("deaths per capita");
     if savefigs:  savefig("plots/deaths_perspective_US.pdf", bbox_inches="tight")
     return
+
+
+#### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####
 
 
 def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):

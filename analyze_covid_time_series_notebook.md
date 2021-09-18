@@ -60,10 +60,12 @@ Put up to 7 countries of interest in the `countries` list. Must be the same name
 countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Mexico"]
 ```
 
-Put up to 7 US states in the `US_locs` list. `US` should be included if you want it to be analyzed along with the states. (county locations TBD)
+US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]` where ST is the state code).
 
 ```python
-US_locs = ["US", "Colorado", "Oregon", "New York", "Florida", "Arizona", "South Dakota"]
+US_locs = ["US", "Colorado", "Idaho", "New York", "Alaska", "Arizona", "Alabama"]
+# example of counties -- analyzed separately below
+#US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
 ```
 
 Read in COVID-19 timeseries data for the locations specified and perform these operations:
@@ -75,8 +77,8 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 ```python
 # days before today (`dbf`) to analyze, and subsampling by `nsub`; more data takes a little more processing time;
 # use `dbf = None` and `nsub = 1` to use all data
-dbf = 300 
-nsub = 3 # subsample every `nsub` points
+dbf = 550 
+nsub = 7 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 # global data
@@ -156,7 +158,7 @@ US local per capita data.
 cvp.rate_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates have gone up and down over time. A flat rate means linear growth.
+Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates have gone up and down over time. A flat rate means linear growth. Exponential growth only happened very early in the pandemic and has been cyclical since, despite all the media buzz.
 
 
 ## US
@@ -177,7 +179,7 @@ US local rate data.
 cvp.active_CFR_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred long ago, we are now clearly having more waves.
+Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred long ago, therecontinue to be more waves.
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. Generally, more testing increases the denominator of the ratio and makes the CFR *lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
@@ -191,13 +193,43 @@ cvp.active_hosp_US_plot(coronaUS_can, lastday, days_before=dbf)
 The Covid Act Now data has hospitalizations by US state. I find it informative to plot hospitalizations next to active cases. Waves of hospitalizations follow closely active cases.
 
 ```python
-cvp.icu_vacc_US_plot(coronaUS_can, lastday, days_before=dbf)
+cvp.icu_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-ICU bed usage (COVID-19 and total) is shown on the left, and vaccinations (percent of population) on the right. There is a slight inverse correlation between vaccinations and ICU bed usage (and hospitalizations as shown in the figure above). An exception is Oregan, with currently high ICU bed usage despite higher vaccinations. Overall, there is not a large spread in vaccinations between states compared to the spread in the COVID-19 incidence data.
+ICU bed usage per capita (left) and percent of total beds (right). Other than Alabama, I haven't noticed many states truly running out of ICU beds (at least not observed by these data).
+
+```python
+cvp.tests_vacc_US_plot(coronaUS_can, lastday, days_before=dbf)
+```
+
+COVID-19 testing (left) and completed vaccinations (right). There is a slight inverse correlation between vaccinations and ICU bed usage (and hospitalizations as shown in the figure above). Overall, there is not a large spread in vaccinations between states compared to the spread in the COVID-19 incidence data (hospitalizations, deaths).
 
 ```python
 cvp.deaths_persp_US_plot(coronaUS_can, lastday, days_before=dbf)
 ```
 
-How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths in 2018. Total COVID-19 deaths so far (per capita) are about 20% of yearly US deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality is so far about 0.2% of the population. Without a vaccine, near full penetration of COVID-19, i.e., becoming "endemic", could result in up to 10 times this many deaths, or 2% of the population, mostly among the old and sick (this is calculated from the CDC's estimated IFR). While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths in 2018. Total COVID-19 deaths so far (per capita) are about 20% of yearly US deaths, and yearly deaths are less than 1% of the population in any given year, so COVID-19 mortality is so far about 0.2% of the population. While not trivial, it is nothing close to disasters of the pre-modern era. The Black Plague mortality is estimated to be about 50%, and famines during the middle ages resulted in 10-25% mortality, sometimes for several years in a row (Wikipedia).
+
+
+# Colorado counties
+
+```python
+US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
+coronaUS_can = covid19_can(US_locs, lastday, lmbd=lmbd, dbf=dbf, nsub=nsub)
+```
+
+```python
+cvp.per_capita_US_plot(coronaUS_can, lastday, days_before=dbf)
+```
+
+```python
+cvp.rate_US_plot(coronaUS_can, lastday, days_before=dbf)
+```
+
+```python
+cvp.icu_US_plot(coronaUS_can, lastday, days_before=dbf)
+```
+
+```python
+cvp.tests_vacc_US_plot(coronaUS_can, lastday, days_before=dbf)
+```
