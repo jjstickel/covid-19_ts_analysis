@@ -3,8 +3,6 @@ module of plotting function-routines for covid data
 """
 
 ## TODO:
-# - plot icu per-cap vs icu frac
-# - plot vaccinations and tests together
 
 from decimal import Decimal
 from datetime import datetime
@@ -459,16 +457,31 @@ def hosp_icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     return
 
 
-# vaccinations; plot against deaths/hosp/icu?
-def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
-    # tests fraction
+# COVID ICU
+def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     locs = corona["locs"]
     nloc = len(locs)
     mult = corona["mult"]
     figure(N, figsize=(2*fw,fh))
     clf()
+    # icu per cap
     subplot(121)
-    ymax = 100
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["icu_covid_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
+             ms=ms, label=locd["name"])
+    if days_before is not None:
+        days_before = -days_before
+    axis(xmin=days_before)
+    xlabel("days before %s" % lastday.date())  
+    ylabel("icu beds per $10^%i$" % np.log10(mult))
+    legend(loc='upper left')
+    title("Current COVID-19 ICU per capita")
+    # icu fraction
+    subplot(122)
+    ymax = 100.0
+    idxnan = days.size-1
     for i in range(nloc):
         locd = corona[locs[i]]
         days = locd["days"] 
@@ -476,10 +489,10 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
              ms=ms, label=locd["name"])
         plot(days, locd["icu_total_frac"]*100, "--"+sbl[i]+clr[i], lw=lw, mfc='none',
              mew=mew, ms=ms)
+        idxnan = min(idxnan, np.nonzero(np.isnan(locd["icu_covid_pc"]))[0][-1])
         # sometimes total icu usage is over 100%, e.g., Alabama
         ymax = max(ymax, np.nanmax(locd["icu_total_frac"])*100)
-    if days_before is not None:
-        days_before = -days_before
+    plot(days[idxnan:], 100*np.ones(days[idxnan:].size), 'k--', lw=0.5)
     ymax = min(120, ymax) # to counter some wild data, e.g. Anchorage Municipality, AK
     axis(xmin=days_before, ymin=0, ymax=ymax)
     xlabel("days before %s" % lastday.date())
@@ -488,6 +501,31 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     annotate("COVID-19 ICU", (0.5, 0.25), xycoords="axes fraction", ha='center')
     #legend(loc='best')
     title("ICU bed usage")
+    if savefigs:  savefig("plots/icu_US.pdf", bbox_inches="tight")
+    return
+
+
+def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
+    locs = corona["locs"]
+    nloc = len(locs)
+    mult = corona["mult"]
+    figure(N, figsize=(2*fw,fh))
+    clf()
+    # tests fraction
+    subplot(121)
+    for i in range(nloc):
+        locd = corona[locs[i]]
+        days = locd["days"] 
+        plot(days, locd["test_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms, mfc='none',
+             label=locd["name"])
+    if days_before is not None:
+        days_before = -days_before
+    axis(xmin=days_before)
+    xlabel("days before %s" % lastday.date())  
+    ylabel("tests, % of population")
+    #legend(loc='best')
+    title("total tests")
+    # vacc frac
     subplot(122)
     for i in range(nloc):
         locd = corona[locs[i]]
@@ -502,10 +540,12 @@ def icu_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     ylabel("vaccinations, % of population")
     legend(loc='best')
     title("Completed vaccinations")
-    if savefigs:  savefig("plots/icu_vacc_US.pdf", bbox_inches="tight")
+    if savefigs:  savefig("plots/tests_vacc_US.pdf", bbox_inches="tight")
     return
 
+    
 
+#### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####
 def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     if days_before is not None:
         days_before = -days_before
@@ -537,8 +577,6 @@ def deaths_persp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None)
     if savefigs:  savefig("plots/deaths_perspective_US.pdf", bbox_inches="tight")
     return
 
-
-#### below plots are no longer interesting and are not maintained, JJS 8/30/21 ####
 
 def hosp_cap_deaths_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     locs = corona["locs"]

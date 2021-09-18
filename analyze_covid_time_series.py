@@ -38,7 +38,8 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 US_locs = ["US", "Colorado", "Idaho", "New York", "Alaska", "Arizona", "Alabama"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
-#US_locs = ["US", "Colorado", "Jefferson County, CO", "Alaska", "Anchorage Municipality, AK"]
+#US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO",
+#           "Alaska", "Anchorage Municipality, AK"]
 
 dbf = None
 #dbf = 300
@@ -118,9 +119,9 @@ cvp.rate_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.active_hosp_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
-cvp.icu_vacc_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.icu_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
-cvp.deaths_persp_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+cvp.tests_vacc_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
 #N+=1
