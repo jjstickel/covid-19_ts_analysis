@@ -437,7 +437,7 @@ def hosp_icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
         days_before = -days_before
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())  
-    ylabel("hospital and icu beds per $10^%i$" % np.log10(mult))
+    ylabel("hospital and ICU beds per $10^%i$" % np.log10(mult))
     legend(loc='best')
     title("Current COVID-19 hospitalizations")
     # ICU bed usage, percent of total
@@ -481,7 +481,7 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
     days_before = max(days_before, days[idxnan])
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())  
-    ylabel("icu beds per $10^%i$" % np.log10(mult))
+    ylabel("ICU beds per $10^%i$" % np.log10(mult))
     legend(loc='upper left')
     title("Current COVID-19 ICU per capita")
     # icu fraction
