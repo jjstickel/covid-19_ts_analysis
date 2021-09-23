@@ -35,7 +35,7 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
 
 # US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]`
 # where ST is the state code)
-US_locs = ["US", "Colorado", "Idaho", "New York", "Alaska", "Arizona", "Alabama"]
+US_locs = ["US", "Colorado", "Idaho", "New York", "Florida", "Arizona", "Alabama"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO",

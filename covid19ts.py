@@ -298,9 +298,10 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
     #    'vaccinesAdministered']
     # note that `hospitalBeds` and `icuBeds` expand further into
     # ['capacity', 'currentUsageTotal', 'currentUsageCovid','typicalUsageRate']
+    ## as of 9/23/21, `typicalUsageRate` for hospital and icu beds was removed ##
     keys = ['cases', 'deaths', 'positiveTests', 'negativeTests',
-            'hospCapacity', 'hospTotal', 'hospCovid', 'hospTypical',
-            'icuCapacity', 'icuTotal', 'icuCovid', 'icuTypical',
+            'hospCapacity', 'hospTotal', 'hospCovid',
+            'icuCapacity', 'icuTotal', 'icuCovid',
             'vaccinesDistributed', 'vaccinationsInitiated', 'vaccinationsCompleted',
             'vaccinesAdministered']
 
@@ -312,6 +313,7 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
 
     # process data
     for loc in locations:
+        #print(loc)
         locd = dict()
         locd["name"] = loc
         data = data_locs[loc]
@@ -326,13 +328,11 @@ def covid19_can(locations, lastday, websource=True, sourcepath=None, mult=multva
         hosp_df = pd.DataFrame(data_df["hospitalBeds"].values.tolist())
         hosp_df.rename(columns={"capacity": "hospCapacity",
                                "currentUsageTotal": "hospTotal",
-                               "currentUsageCovid": "hospCovid",
-                                "typicalUsageRate": "hospTypical"}, inplace=True)
+                               "currentUsageCovid": "hospCovid"}, inplace=True)
         icu_df = pd.DataFrame(data_df["icuBeds"].values.tolist())
         icu_df.rename(columns={"capacity": "icuCapacity",
                                "currentUsageTotal": "icuTotal",
-                               "currentUsageCovid": "icuCovid",
-                               "typicalUsageRate": "icuTypical"}, inplace=True)
+                               "currentUsageCovid": "icuCovid"}, inplace=True)
         # remove hospital and icu bed columns that are actually elements of dictionaries
         data_df = data_df.drop(columns=["hospitalBeds", "icuBeds"])
         # add back hospital and icu bed columns
