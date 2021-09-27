@@ -15,7 +15,7 @@ A jupyter notebook is implemented via
 `analyze_covid_time_series_notebook.md` (jupytext required). A static snapshot
 including figures is available at:
 
-https://drive.google.com/drive/folders/10XQeJSz8GodDU-e9hr02_fcsW3g_fodc?usp=sharing
+https://colab.research.google.com/drive/1rH7V7MzUNIXpS1R65beDz-klu-y1xJah?usp=sharing
 
 The python notebook can be run "live" by clicking on this binder link (it may
 take awhile to load, be patient):

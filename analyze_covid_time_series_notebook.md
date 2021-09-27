@@ -25,9 +25,9 @@ analyses of COVID-19 data. Data sources are:
 - https://data.worldbank.org/indicator/sp.pop.totl (world populations)
 - https://www.cdc.gov/ (total US deaths)
 
-By default, the COVID-19 data is grabbed from web sources directly. See arguments to functions for specifying files in your local path.
+Scroll down to see the data plots and analysis. 
 
-To run the entire notebook, click `Cell` from the menu above and then `Run All`.
+To run the entire notebook (via Binder link below or on your local computer), click `Cell` from the menu above and then `Run All`. By default, the COVID-19 data is grabbed from web sources directly. See arguments to functions for specifying files in your local path.
 
 Dependencies are:
 
