@@ -405,8 +405,9 @@ def active_hosp_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
              ms=ms, label=locd["name"])
         #if capacity:  # no longer using this, switching to ICU data with covid act now data
         #    plot(days, locd["hsp_cap_pc"]*np.ones(days.size), "--"+clr[i], lw=lw)
-        idxnan = min(idxnan, np.nonzero(np.isnan(locd["hosp_covid_pc"]))[0][-1])
-    days_before = max(days_before, days[idxnan])
+    #     idxnans = np.nonzero(np.isnan(locd["hosp_covid_pc"]))[0]
+    #     if idxnans.size != 0:  idxnan = min(idxnan, idxnans[-1])
+    # if idxnan != np.inf:  days_before = max(days_before, days[idxnan])
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())
     ylabel("hospitalizations per $10^%i$" % np.log10(mult))
@@ -477,8 +478,9 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
         days = locd["days"] 
         plot(days, locd["icu_covid_pc"], "-"+sbl[i]+clr[i], lw=lw, mfc='none', mew=mew,
              ms=ms, label=locd["name"])
-        idxnan = min(idxnan, np.nonzero(np.isnan(locd["icu_covid_pc"]))[0][-1])
-    days_before = max(days_before, days[idxnan])
+    #     idxnans = np.nonzero(np.isnan(locd["hosp_covid_pc"]))[0]
+    #     if idxnans.size != 0:  idxnan = min(idxnan, idxnans[-1])
+    # if idxnan != np.inf:  days_before = max(days_before, days[idxnan])
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())  
     ylabel("ICU beds per $10^%i$" % np.log10(mult))
@@ -496,7 +498,8 @@ def icu_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
              mew=mew, ms=ms)
          # sometimes total icu usage is over 100%, e.g., Alabama
         ymax = max(ymax, np.nanmax(locd["icu_total_frac"])*100)
-    plot(days[idxnan:], 100*np.ones(days[idxnan:].size), 'k--', lw=0.5)
+#    plot(days[idxnan:], 100*np.ones(days[idxnan:].size), 'k--', lw=0.5)
+    plot([days_before, 0], [100,100], "k--", lw=0.5)
     ymax = min(120, ymax) # to counter some wild data, e.g. Anchorage Municipality, AK
     axis(xmin=days_before, ymin=0, ymax=ymax)
     xlabel("days before %s" % lastday.date())
@@ -539,8 +542,9 @@ def tests_vacc_US_plot(corona, lastday, N=1, savefigs=False, days_before=None):
 #             mfc='none')
         plot(days, locd["vacc_full_frac"]*100, "-"+sbl[i]+clr[i], lw=lw, mew=mew, ms=ms,
              mfc='none', label=locd["name"])
-    idxnan = min(idxnan, np.nonzero(np.isnan(locd["vacc_full_frac"]))[0][-1])
-    days_before = max(days_before, days[idxnan])
+    #     idxnans = np.nonzero(np.isnan(locd["hosp_covid_pc"]))[0]
+    #     if idxnans.size != 0:  idxnan = min(idxnan, idxnans[-1])
+    # if idxnan != np.inf:  days_before = max(days_before, days[idxnan])
     #axis(xmin=days_before, ymin=0, ymax=100)
     axis(xmin=days_before)
     xlabel("days before %s" % lastday.date())

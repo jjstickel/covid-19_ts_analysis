@@ -30,7 +30,7 @@ ion()
 ## single entry in the file (e.g., China has multiple entries and will cause an
 ## Exception)
 #countries = ["US", "Italy", "Spain", "Sweden", "Brazil"]
-countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "India"]
+countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Singapore"]
 #countries = ["US", "Sweden", "Denmark", "Norway"]
 
 # US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]`
@@ -122,6 +122,9 @@ N+=1
 cvp.icu_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 N+=1
 cvp.tests_vacc_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
+
+
+
 
 
 #N+=1
