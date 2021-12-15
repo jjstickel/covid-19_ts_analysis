@@ -35,15 +35,14 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Singapore"]
 
 # US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]`
 # where ST is the state code)
-US_locs = ["US", "Colorado", "Idaho", "New York", "Florida", "Arizona", "Alabama"]
+#US_locs = ["US", "Colorado", "Idaho", "New York", "Florida", "Arizona", "Alabama"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
-#US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO",
-#           "Alaska", "Anchorage Municipality, AK"]
+US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO", "Douglas County, CO"]
 
 #dbf = None
-dbf = 550
-nsub = 7 # subsample every `nsub` points
+dbf = 90
+nsub = 1 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 

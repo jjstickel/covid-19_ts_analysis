@@ -8,7 +8,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.11.4
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -77,8 +77,8 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 ```python
 # days before today (`dbf`) to analyze, and subsampling by `nsub`; more data takes a little more processing time;
 # use `dbf = None` and `nsub = 1` to use all data
-dbf = 550 
-nsub = 7 # subsample every `nsub` points
+dbf = 90 
+nsub = 1 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 # global data
@@ -214,7 +214,7 @@ How bad is COVID-19 really? Deaths are plotted with the total yearly US deaths i
 # Colorado counties
 
 ```python
-US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
+US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Larimer County, CO"]
 coronaUS_can = covid19_can(US_locs, lastday, lmbd=lmbd, dbf=dbf, nsub=nsub)
 ```
 
