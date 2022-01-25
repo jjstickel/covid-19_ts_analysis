@@ -35,14 +35,14 @@ countries = ["US", "Italy", "Spain", "Germany", "Sweden", "Brazil", "Singapore"]
 
 # US locations, up to 7 (`US`, States, and counties in the form `[name] County, [ST]`
 # where ST is the state code)
-#US_locs = ["US", "Colorado", "Idaho", "New York", "Florida", "Arizona", "Alabama"]
+US_locs = ["US", "Colorado", "California", "New York", "Florida", "Arizona", "Alabama"]
 #US_locs = ["Colorado", "New York", "Florida", "Wisconsin", "North Dakota", "South Dakota"]
 #US_locs = ["US", "Colorado", "Jefferson County, CO", "Douglas County, CO", "Denver County, CO", "Boulder County, CO"]
-US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO", "Douglas County, CO"]
+#US_locs = ["US", "Colorado", "Jefferson County, CO", "Larimer County, CO", "Douglas County, CO"]
 
 #dbf = None
-dbf = 90
-nsub = 1 # subsample every `nsub` points
+dbf = 365
+nsub = 3 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 
@@ -133,7 +133,34 @@ cvp.tests_vacc_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before
 # cvp.hosp_cap_deaths_US_plot(coronaUS_can, lastday, N, savefigs=saveplots, days_before=dbf)
 
 
-# # custom analysis
+# # custom or experimental analysis
+# clr = ['C%g' % i for i in range(10)]
+# sbl = ["o", "s", "v", "d", "x", "^", "*"]
+# mew = 0.5
+# ms = 4
+# lw = 1.5
+
+# locs = coronaUS_can["locs"]
+# nloc = len(locs)
+# N+=1
+# figure(N)
+# clf()
+# for i in range(nloc):
+#     locd = coronaUS_can[locs[i]]
+#     days = locd["days"]
+#     plot(days, locd["hospCovid"]/locd["cases"], "-"+sbl[i]+clr[i], lw=lw, mfc='none',
+#          mew=mew, ms=ms, label=locd["name"])
+#     #hospNotCovid = locd["hospTotal"] - locd["hospCovid"]
+#     #plot(days, hospNotCovid/locd["cases"], "-"+sbl[i]+clr[i], lw=lw, mfc='none',
+#     #     mew=mew, ms=ms, label=locd["name"])
+#     plot(days, locd["hospTotal"]/locd["cases"], "--"+sbl[i]+clr[i], lw=lw, mfc='none',
+#          mew=mew, ms=ms)
+# axis(xmin=-dbf)
+# xlabel("days before %s" % lastday.date())  
+# ylabel("hospitalizations per covid cases")
+# legend(loc="best")
+
+
 # co = coronaUS_can['Colorado']
 # poslast = co["positive"][-1] - co["positive"][-2]
 # teslast = co["totalTestResults"][-1] - co["totalTestResults"][-2]

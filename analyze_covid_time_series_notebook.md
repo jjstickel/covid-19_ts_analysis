@@ -6,9 +6,9 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.11.4
+      jupytext_version: 1.13.3
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: Python 3
     language: python
     name: python3
 ---
@@ -77,8 +77,8 @@ Read in COVID-19 timeseries data for the locations specified and perform these o
 ```python
 # days before today (`dbf`) to analyze, and subsampling by `nsub`; more data takes a little more processing time;
 # use `dbf = None` and `nsub = 1` to use all data
-dbf = 90 
-nsub = 1 # subsample every `nsub` points
+dbf = 365 
+nsub = 3 # subsample every `nsub` points
 if (nsub > 14):
     raise Warning("Subsampling period of %g is too large (>14) for estimating active cases" % nsub)
 # global data
@@ -137,7 +137,7 @@ cvp.ms = 5
 cvp.per_capita_global_plot(corona, lastday, days_before=dbf)
 ```
 
-The US has a lot more confirmed per-capita cases than many countries. This could be attributed to more testing. Deaths continue to rise with recent uptick presumably due to Delta variant. See rate plots below.
+The US has more confirmed per-capita cases than many countries. This could be attributed to more testing. Deaths continue to rise with recent upticks due to waves of new variant. See rate plots below.
 
 
 ## US
@@ -158,7 +158,7 @@ US local per capita data.
 cvp.rate_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates have gone up and down over time. A flat rate means linear growth. Exponential growth only happened very early in the pandemic and has been cyclical since, despite all the media buzz.
+Growth rate is the derivative of the cases (i.e., instantaneous slope for each day). Rates have gone up and down over time. A flat rate means linear growth. Exponential growth only happened very early in the pandemic (despite all the media buzz at the time) and has been cyclical since. Omicron variant resulted in very high growth rates of cases. Fortunately, death rates remain lower than the worst of the previous waves.
 
 
 ## US
