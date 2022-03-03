@@ -6,16 +6,16 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.3
+      jupytext_version: 1.13.7
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
 
 # COVID-19 time-series analysis
 
-Jonathan Stickel, 2020-2021
+Jonathan Stickel, 2020-2022
 
 This purpose of this notebook (and repository) is to make available a set of time-series
 analyses of COVID-19 data. Data sources are:
@@ -137,7 +137,7 @@ cvp.ms = 5
 cvp.per_capita_global_plot(corona, lastday, days_before=dbf)
 ```
 
-The US has more confirmed per-capita cases than many countries. This could be attributed to more testing. Deaths continue to rise with recent upticks due to waves of new variant. See rate plots below.
+The US has more confirmed per-capita cases than many countries. This could be attributed to more testing. Deaths continue to rise with recent upticks due to waves of new variants. See rate plots below.
 
 
 ## US
@@ -179,7 +179,7 @@ US local rate data.
 cvp.active_CFR_global_plot(corona, lastday, days_before=dbf)
 ```
 
-Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred long ago, therecontinue to be more waves.
+Have we peaked? A curve of active cases help us answer this. While an initial peak ocurred long ago, there continue to be more waves.
 
 The "case fatality ratio", or *CFR*, is an indication of how deadly a disease is. It is only an indication because it is limited by how many actual cases are measured and *confirmed*. Here, we see that the US is doing pretty good compared to other countries. Generally, more testing increases the denominator of the ratio and makes the CFR *lower*. (Note: the CFR is commonly called the case fatality *rate*. The use of the word rate here is technically incorrect---rate refers to something changing over *time*. [More info here](https://ourworldindata.org/coronavirus?fbclid=IwAR3zOvtt7gqkhitoHJ_lXDr3eDeE_JPtfukpOkY94PSaBm_hmrMvWCXWFpg#what-do-we-know-about-the-risk-of-dying-from-covid-19))
 
